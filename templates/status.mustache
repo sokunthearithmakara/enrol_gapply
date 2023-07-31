@@ -1,0 +1,33 @@
+{{#notavailableyet}}
+<div class="alert alert-warning mb-3" style="display: flex; align-items: center;"><i
+        class="fa fa-calendar-xmark fa-2x mr-4 d-none d-md-block"></i>
+    <div>
+        <p class="mb-0">{{{time}}}</p>
+    </div>
+</div>
+{{/notavailableyet}}
+{{#notavailableanymore}}
+<div class="alert alert-warning mb-3" style="display: flex; align-items: center;"><i
+        class="fa fa-calendar-xmark fa-2x mr-4 d-none d-md-block"></i>
+    <div>
+        <p class="mb-0">{{{time}}}</p>
+    </div>
+</div>
+{{/notavailableanymore}}
+{{#notready}}
+<div class="alert alert-warning d-flex align-items-center"><i class="fa fa-id-card fa-5x mr-4 d-none d-md-block"></i>
+    <div>
+        <div class="mb-2">{{#str}}profilefieldrequired,enrol_gapply{{/str}}</div>
+        <b>{{#str}}requiredfields,enrol_gapply{{/str}}</b>
+        {{#hasfields}}
+        <ul>
+            {{#fields}}<li>{{name}}</li>{{/fields}}
+        </ul>
+        {{/hasfields}}
+        {{#editprofile}}
+        <a class="ml-1 btn btn-warning text-uppercase font-weight-bold"
+            href="{{{editprofile}}}">{{#str}}editmyprofile,enrol_gapply{{/str}}</a>
+        {{/editprofile}}
+    </div>
+</div>
+{{/notready}}

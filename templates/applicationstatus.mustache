@@ -1,0 +1,81 @@
+{{#noenrolment}}
+<div class="alert alert-danger mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-ban fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}cannotenrol, enrol_gapply{{/str}}
+        </div>
+    </div>
+</div>
+{{/noenrolment}}
+{{#expired}}
+<div class="alert alert-danger mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-ban fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}enrolmentexpired, enrol_gapply, {{enrolmentend}}{{/str}}
+        </div>
+    </div>
+</div>
+{{/expired}}
+{{#suspended}}
+<div class="alert alert-danger mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-ban fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}enrolmentsuspended, enrol_gapply{{/str}}
+        </div>
+    </div>
+</div>
+{{/suspended}}
+{{#new}}
+<div class="alert alert-info mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-file-lines fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}alreadyapplied, enrol_gapply, {{time}}{{/str}}
+        </div>
+    </div>
+</div>
+{{/new}}
+{{#approved}}
+<div class="alert alert-success mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-file-circle-check fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}enrollmentapproved, enrol_gapply, {{enrolmentstart}}{{/str}}
+        </div>
+    </div>
+</div>
+{{/approved}}
+{{#waitlisted}}
+<div class="alert alert-warning mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-file-circle-question fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}youhavebeenwaitlisted, enrol_gapply, {{time}}{{/str}}
+        </div>
+    </div>
+</div>
+{{/waitlisted}}
+{{#rejected}}
+<div class="alert alert-danger mt-3">
+    <div class="media">
+        <div class="mr-3 icon-size-5"><i class="fa fa-file-circle-xmark fa-2x"></i></div>
+        <div class="media-body align-self-center">{{#str}}youhavebeenrejected, enrol_gapply, {{time}}{{/str}}
+        </div>
+    </div>
+</div>
+{{/rejected}}
+{{#hasapplication}}
+<div class="bg-white border p-3 rounded text-dark mb-3">
+<h5>{{#str}}applicationdetails,enrol_gapply{{/str}}</h5>
+{{{applytext}}}
+{{#hasattachments}}
+{{#attachments}}
+<div class="text-truncate"><a class="attachmentlink" data-type="{{mimetype}}" data-url="{{url}}"
+        href="javascript:void(0)"><i class="fa fa-fw fa-paperclip mr-1"></i>{{filename}}</a></div>
+{{/attachments}}
+{{/hasattachments}}
+</div>
+{{/hasapplication}}
+
+{{#js}}
+require(['enrol_gapply/previewfile'], function(previewfile) {
+    previewfile.init();
+});
+{{/js}}

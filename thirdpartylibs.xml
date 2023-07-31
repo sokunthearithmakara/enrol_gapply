@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>amd/src/buttons.bootstrap4.js</location>
+        <name>Datatables Buttons Extension - Bootstrap 4</name>
+        <version>2.4.1</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/buttons.colVis.js</location>
+        <name>Datatables Column Visibility Extension</name>
+        <version>2.4.1</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/buttons.html5.js</location>
+        <name>Datatables HTML5 Export Extension</name>
+        <version>2.4.1</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/dataTables.bootstrap4.js</location>
+        <name>Datatables Bootstrap 4 Styling Framework</name>
+        <version>4.6.0</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/dataTables.buttons.js</location>
+        <name>Datatables Buttons Extension</name>
+        <version>2.4.1</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/dataTables.rowGroup.js</location>
+        <name>Datatables RowGroup Extension</name>
+        <version>1.4.0</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/dataTables.select.js</location>
+        <name>Datatables Select Extension</name>
+        <version>1.7.0</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/jquery.dataTables.js</location>
+        <name>Datatables Library</name>
+        <version>1.13.5</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/rowGroup.bootstrap4.js</location>
+        <name>Datatables RowGroup Bootstrap 4 Styling</name>
+        <version>3.1.5</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/jszip.js</location>
+        <name>JSZip Library</name>
+        <version>3.10.1</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/select.bootstrap4.js</location>
+        <name>Datatables Select Bootstrap 4 Styling</name>
+        <version>3.1.5</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>amd/src/select2.js</location>
+        <name>Select2 Librarys</name>
+        <version>4.1.0-rc.0</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+
+</libraries>
