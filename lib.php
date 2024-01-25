@@ -427,7 +427,7 @@ class enrol_gapply_plugin extends enrol_plugin {
             $output = $OUTPUT->render_from_template('enrol_gapply/applicationstatus', $recordcontext);
 
             // Add empty form to $output so that it looks like a form.
-            $form = new emptyform(null,
+            $form = new enrol_gapply_emptyform(null,
             array('instance' => $instance,
             'output' => $output), 'post', '',
             array('class' => 'enrolgapplyform'));
@@ -850,7 +850,7 @@ require_once($CFG->libdir . '/formslib.php');
 /**
  * Form for adding a new instance of the gapply enrolment plugin.
  */
-class emptyform extends moodleform {
+class enrol_gapply_emptyform extends moodleform {
     /**
      * Add elements to form.
      * @return void
@@ -875,9 +875,14 @@ class emptyform extends moodleform {
  * Add loading div.
  */
 function enrol_gapply_before_footer() {
-    $loading = '<div id="enrol-gapply-loading" class="d-none align-items-center justify-content-center position-fixed w-100 h-100"
+    global $PAGE;
+    //check page id; if equal to page-enrol-gapply-manage then add loading;
+    if ($PAGE->bodyid == 'page-enrol-gapply-manage') {
+        $loading = '<div id="enrol-gapply-loading" class="d-none align-items-center justify-content-center position-fixed w-100 h-100"
     style="top: 0;bottom: 0; left: 0; right: 0; z-index: 9999; background: rgba(0,0,0,0.5);">
     <div class="spinner-grow text-light" style="width: 3rem; height: 3rem;" role="status">
     <span class="sr-only">Loading...</span></div></div>';
-    echo $loading;
+        echo $loading;
+    }
+
 }

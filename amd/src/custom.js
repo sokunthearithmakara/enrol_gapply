@@ -20,12 +20,12 @@ define(
         'enrol_gapply/dataTables.rowGroup',
         'enrol_gapply/rowGroup.bootstrap4',
         'enrol_gapply/buttons.colVis',
-    ], function($, JSZip, toast) {
+    ], function ($, JSZip, toast) {
         window.JSZip = JSZip;
         return {
-            init: function(tab, id) {
+            init: function (tab, id) {
                 // Get current language
-                $("body").on('click', 'a[data-type]', function(e) {
+                $("body").on('click', 'a[data-type]', function (e) {
                     var modal = `<div class="modal fade" id="applyfile" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="applyfileLabel" aria-modal="true" role="dialog">
                                                     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                                                         <div class="modal-content">
@@ -80,7 +80,7 @@ define(
 
                     var newURL = new URL($(this).data("url"));
 
-                    $("#applyfile").on("click", "#forcedownloadbutton", function(e) {
+                    $("#applyfile").on("click", "#forcedownloadbutton", function (e) {
                         newURL.searchParams.append("forcedownload", 1);
                         window.open(newURL.toString());
                     });
@@ -88,7 +88,7 @@ define(
 
                 var timecreatedIndex = $("th").index($("th.timecreated"));
                 var profileFields = [];
-                $("th.profilefield").each(function(index, element) {
+                $("th.profilefield").each(function (index, element) {
                     var pr = {
                         index: $("th").index($(this)),
                         text: $(this).text(),
@@ -108,7 +108,7 @@ define(
                 var option = {
                     ajax: {
                         url: M.cfg.wwwroot + '/enrol/gapply/ajax.php' + `?id=${id}&action=getapplications&tab=${tab}&sesskey=${M.cfg.sesskey}`,
-                        dataSrc: function(json) {
+                        dataSrc: function (json) {
                             return json;
                         },
                     },
@@ -191,7 +191,7 @@ define(
                         'orderable': false,
                     }
                     ],
-                    'initComplete': function() {
+                    'initComplete': function () {
                         // Wrap the table in a div with overflow-x:auto
                         $('#gapplytable').wrap('<div style="overflow-x:auto;"></div>');
                         $('.dataTables_length').addClass('mx-1');
@@ -232,14 +232,14 @@ define(
                 var table = $('#gapplytable').DataTable(option);
 
                 // Handle filter event
-                $('body').on('keyup', '#filterregion input', function() {
+                $('body').on('keyup', '#filterregion input', function () {
                     var index = $(this).data('index');
                     var value = $(this).val();
                     table.column(index).search(value, false, true).draw();
                 });
 
                 // Handle sort event
-                $("body").on("click", "#sortdropdown.dropdown-menu a", function() {
+                $("body").on("click", "#sortdropdown.dropdown-menu a", function () {
                     // If sort order is selected
                     if ($(this).data("order")) {
                         // Remove active class from all sort order options
@@ -267,27 +267,27 @@ define(
 
                 let getRowData = (table, rows) => {
                     $(".action-button:not(.menu-action)").remove();
-                    selecteddata = table.rows({selected: true}).data().toArray().map(row => row[1]);
+                    selecteddata = table.rows({ selected: true }).data().toArray().map(row => row[1]);
                     if (selecteddata.length > 0) {
                         $("#gapplytable_length label").after(`
-            <button class="btn btn-sm alert-success action-button" data-action="approve" data-toggle="tooltip" title="${M.util.get_string("approve", "enrol_gapply")}"><i class="fa fa-fw fa-check"></i></button>
-            <button class="btn btn-sm alert-info action-button" data-action="waitlist" data-toggle="tooltip" title="${M.util.get_string("waitlist", "enrol_gapply")}"><i class="fa fa-fw fa-stopwatch"></i></button>
-            <button class="btn btn-sm alert-warning action-button" data-action="reject" data-toggle="tooltip" title="${M.util.get_string("reject", "enrol_gapply")}"><i class="fa fa-fw fa-times"></i></button>
-            <button class="btn btn-sm alert-danger action-button" data-action="delete" data-toggle="tooltip" title="${M.util.get_string("delete", "enrol_gapply")}"><i class="fa fa-fw fa-trash"></i></button>`
+                            <button class="btn btn-sm alert-success action-button" data-action="approve" data-toggle="tooltip" title="${M.util.get_string("approve", "enrol_gapply")}"><i class="fa fa-fw fa-check"></i></button>
+                            <button class="btn btn-sm alert-info action-button" data-action="waitlist" data-toggle="tooltip" title="${M.util.get_string("waitlist", "enrol_gapply")}"><i class="fa fa-fw fa-stopwatch"></i></button>
+                            <button class="btn btn-sm alert-warning action-button" data-action="reject" data-toggle="tooltip" title="${M.util.get_string("reject", "enrol_gapply")}"><i class="fa fa-fw fa-times"></i></button>
+                            <button class="btn btn-sm alert-danger action-button" data-action="delete" data-toggle="tooltip" title="${M.util.get_string("delete", "enrol_gapply")}"><i class="fa fa-fw fa-trash"></i></button>`
                         );
                     } else {
                         $(".action-button:not(.menu-action)").remove();
                     }
                 };
 
-                table.on('select', function(e, dt, type, indexes) {
+                table.on('select', function (e, dt, type, indexes) {
                     getRowData(dt, indexes);
                 });
-                table.on('deselect', function(e, dt, type, indexes) {
+                table.on('deselect', function (e, dt, type, indexes) {
                     getRowData(dt, indexes);
                 });
 
-                $(document).on('click', '.action-button', function() {
+                $(document).on('click', '.action-button', function () {
                     var action = $(this).data("action");
                     var primarybutton = "btn-success";
                     if (action == "waitlist") {
@@ -311,16 +311,16 @@ define(
                             sesskey: M.cfg.sesskey,
                         },
                         dataType: "json",
-                        success: function(data) {
+                        success: function (data) {
                             var groupoptions = "";
 
                             if (data.length > 0 && action == "approve") {
-                                data.forEach(function(group) {
+                                data.forEach(function (group) {
                                     // Render checkbox
                                     groupoptions += `<div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input groups" id="group-${group.id}" name="groups[]" value="${group.id}">
-                    <label class="custom-control-label" for="group-${group.id}">${group.name}</label>
-                    </div>`;
+                                                        <input type="checkbox" class="custom-control-input groups" id="group-${group.id}" name="groups[]" value="${group.id}">
+                                                        <label class="custom-control-label" for="group-${group.id}">${group.name}</label>
+                                                        </div>`;
                                 });
 
                                 groupoptions = `<div class="form-group mt-3">
@@ -356,7 +356,7 @@ define(
                             $("#approveModal").modal("show");
 
                             // Approve
-                            $("#approveModal #proceed").click(function() {
+                            $("#approveModal #proceed").click(function () {
                                 $("#approveModal").modal("hide");
                                 $("#enrol-gapply-loading").toggleClass("d-none d-flex");
                                 $.ajax({
@@ -366,15 +366,16 @@ define(
                                         action: action,
                                         ids: selecteddata.toString(),
                                         id: $("#gapplytable").data("instance"),
-                                        groups: $("#approveModal input.groups:checked").map(function() {
+                                        groups: $("#approveModal input.groups:checked").map(function () {
                                             return this.value;
                                         }).get().toString(),
+                                        sesskey: M.cfg.sesskey,
                                     },
-                                    success: function(data) {
+                                    success: function (data) {
                                         // Reload page
                                         location.reload();
                                     },
-                                    error: function(data) {
+                                    error: function (data) {
                                         location.reload();
                                     }
                                 });
@@ -383,7 +384,7 @@ define(
                     });
                 });
 
-                $(document).on('click', '.showuserdetail', function() {
+                $(document).on('click', '.showuserdetail', function () {
                     $("#enrol-gapply-loading").toggleClass("d-none d-flex");
                     var userid = $(this).data("userid");
 
@@ -393,7 +394,7 @@ define(
                     selecteddata = [applicationid];
                     var applicationtext = $(".applicationtext[data-id='" + applicationid + "']").html();
                     var attachments = [];
-                    $('#gapplytable a.attachmentlink[data-id="' + applicationid + '"]').each(function() {
+                    $('#gapplytable a.attachmentlink[data-id="' + applicationid + '"]').each(function () {
                         var file = {
                             'link': $(this).data('url'),
                             'filename': $(this).text(),
@@ -405,7 +406,7 @@ define(
                     if (attachments.length > 0) {
                         // Select input
                         select = `<select class="custom-select w-100 my-2" id="fileselect">`;
-                        attachments.forEach(function(attachment) {
+                        attachments.forEach(function (attachment) {
                             select += `<option data-type="${attachment.type}" value="${attachment.link}">${attachment.filename}</option>`;
                         });
                         select += `</select>`;
@@ -417,12 +418,12 @@ define(
                         type: 'GET'
                     }).fail(response => {
                         var modal = `<div class="modal fade" id="userdetailModal" tabindex="-1" role="dialog" aria-labelledby="userdetailModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl" role="document" style="max-width: calc(100% - 2rem);">
-                    <div class="modal-content">
-                    ${response.responseText}
-                    </div>
-                </div>
-            </div>`;
+                                        <div class="modal-dialog modal-xl" role="document" style="max-width: calc(100% - 2rem);">
+                                            <div class="modal-content">
+                                            ${response.responseText}
+                                            </div>
+                                        </div>
+                                    </div>`;
                         // Remove any existing modal
                         $("#userdetailModal").remove();
                         $("body").append(modal);
@@ -435,7 +436,7 @@ define(
                         $("#userdetailModal .select-input").html(select);
                         $("#userdetailModal #applicationtext").html(applicationtext);
                         $("#userdetailModal #currentstatus").html(status);
-                        let changefile = function(url, type, name) {
+                        let changefile = function (url, type, name) {
                             $(".fileview #viewer").html(name);
                             if (type.includes("image")) {
                                 $(".fileview #viewer").html(`<img src="${url}" class="img-fluid mx-auto">`);
@@ -467,22 +468,19 @@ define(
                             $("#downloadbutton").attr("href", url);
                         };
 
-                        $("#fileselect").change(function() {
+                        $("#fileselect").change(function () {
                             changefile($(this).val(), $(this).find(":selected").data("type"), $(this).find(":selected").text());
                         });
 
                         $("#fileselect").trigger("change");
                     }).done(response => {
                         $("#enrol-gapply-loading").toggleClass("d-none d-flex");
-                        toast("Unable to get the application detail.", {
-                            "type": "error"
-                        });
                         window.console.log(response);
                     });
 
                 });
 
-                $(document).on('click', '#selectall', function() {
+                $(document).on('click', '#selectall', function () {
                     if ($(this).is(":checked")) {
                         table.rows({
                             search: 'applied'

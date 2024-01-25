@@ -28,12 +28,12 @@ require_once($CFG->dirroot . '/enrol/gapply/lib.php');
 require_once($CFG->libdir . '/enrollib.php');
 require_once($CFG->dirroot . '/group/lib.php');
 require_login();
+require_sesskey();
 
 $action = required_param('action', PARAM_TEXT);
 $id = required_param('id', PARAM_INT);
 $instance = $DB->get_record('enrol', array('id' => $id), '*', MUST_EXIST);
 $courseid = $instance->courseid;
-
 
 $context = context_course::instance($courseid);
 
@@ -48,14 +48,14 @@ $enrol = enrol_get_plugin('gapply');
 if ($action == "approve") {
     $ids = required_param('ids', PARAM_TEXT);
     $ids = explode(',', $ids);
-
+    $ids = array_map('intval', $ids); // Sanitize the input values
     // Get records from enrol_gapply where id in ids.
     $records = $DB->get_records_list('enrol_gapply', 'id', $ids);
 
     $message = new stdClass();
     $course = $DB->get_record('course', array('id' => $courseid));
-    $message->subject = get_string('applicationapproved', 'enrol_gapply', $course->fullname);
-    $message->text = get_string('applicationapproved', 'enrol_gapply', $course->fullname);
+    $message->subject = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+    $message->text = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
     $message->contexturl = new moodle_url('/course/view.php', array('id' => $courseid));
     $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
 
@@ -78,15 +78,17 @@ if ($action == "approve") {
     die;
 } else if ($action == "waitlist" || $action == "reject") {
     $ids = required_param('ids', PARAM_TEXT);
+    $ids = explode(',', $ids);
+    $ids = array_map('intval', $ids); // Sanitize the input values
     // Update records from enrol_gapply where id in ids to status waitlisted.
-    $DB->set_field_select('enrol_gapply', 'status', $action . 'ed', 'id IN (' . $ids . ')');
+    $DB->set_field_select('enrol_gapply', 'status', $action . 'ed', 'id IN (' . implode(',', $ids) . ')');
     $message = new stdClass();
     $course = $DB->get_record('course', array('id' => $courseid));
-    $message->subject = get_string('application' . $action, 'enrol_gapply', $course->fullname);
-    $message->text = get_string('application' . $action, 'enrol_gapply', $course->fullname);
+    $message->subject = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+    $message->text = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
     $message->contexturl = new moodle_url('/course/view.php', array('id' => $courseid));
     $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
-    $records = $DB->get_records_list('enrol_gapply', 'id', explode(',', $ids));
+    $records = $DB->get_records_list('enrol_gapply', 'id', $ids);
     foreach ($records as $record) {
         $user = $DB->get_record('user', array('id' => $record->userid));
         $enrol->send_notification($user, $USER, $message);
@@ -96,6 +98,7 @@ if ($action == "approve") {
     $ids = required_param('ids', PARAM_TEXT);
     $ids = explode(',', $ids);
     // Get userid  from enrol_gapply where id in ids.
+    $ids = array_map('intval', $ids); // Sanitize the input values
     $userid = $DB->get_fieldset_select('enrol_gapply', 'userid', 'id IN (' . implode(',', $ids) . ')');
     // Delete records from enrol_gapply where id in ids.
     $DB->delete_records_list('enrol_gapply', 'id', $ids);
@@ -106,10 +109,11 @@ if ($action == "approve") {
     }
     die;
 } else if ($action == "getuserbyid") {
-    require_sesskey();
     $userid = required_param('userid', PARAM_INT);
     require_once($CFG->dirroot . '/user/profile/lib.php');
     $showuseridentity = explode(',', ('firstname,lastname,' . $instance->customtext3));
+    // Remove empty element.
+    $showuseridentity = array_filter($showuseridentity);
     // Remove picture from array.
     $showuseridentity = array_diff($showuseridentity, array('picture'));
     $corefields = [];
@@ -125,9 +129,11 @@ if ($action == "approve") {
 
     $corefield = 'id, firstaccess, lastaccess, ' . implode(', ', $corefields);
     $user = $DB->get_record('user', array('id' => $userid), $corefield);
-    profile_load_custom_fields($user);
+    if (!empty($customfields)) {
+        profile_load_custom_fields($user);
+    }
 
-    $user->picture = $OUTPUT->user_picture($user, array('size' => 64));
+    $user->picture = $OUTPUT->user_picture($user, array('size' => 64, 'class' => 'mr-2', 'link' => false));
     $user->fullname = fullname($user);
     $user->membersince = userdate($user->firstaccess, get_string('strftimedate'));
     $user->lastaccess = userdate($user->lastaccess, get_string('strftimedate'));
@@ -161,10 +167,12 @@ if ($action == "approve") {
     // Get records from enrol_gapply table where 'instance' = $id and 'status' is not 'approved'.
     $sql = "SELECT * FROM {enrol_gapply} WHERE instance = ? AND status = ?";
     $records = $DB->get_records_sql($sql, array($id, $tab));
+
     if ($records) {
-        $fs = get_file_storage();
         require_once($CFG->dirroot . '/user/profile/lib.php');
         $showuseridentity = explode(',', ('firstname,lastname,' . $instance->customtext3));
+        // Remove empty array.
+        $showuseridentity = array_filter($showuseridentity);
         // Remove picture from array.
         $showuseridentity = array_diff($showuseridentity, array('picture'));
         $corefields = [];
@@ -179,6 +187,8 @@ if ($action == "approve") {
         }
 
         $corefield = 'id, ' . implode(', ', $corefields);
+
+        $fs = get_file_storage();
 
         foreach ($records as $record) {
             // Create an array for attachments.
@@ -202,15 +212,17 @@ if ($action == "approve") {
             }
             $record->attachments = $attachments;
             $record->user = $DB->get_record('user', array('id' => $record->userid), $corefield);
-            // Load profile fields data to user object.
-            profile_load_custom_fields($record->user);
+            // Load profile fields data to user object if there is any.
+            if (!empty($customfields)) {
+                profile_load_custom_fields($record->user);
+            }
         }
 
         $table = new stdClass();
         $table->data = [];
 
         foreach ($records as $record) {
-            $userpicture = $OUTPUT->user_picture($record->user, array('size' => 30));
+            $userpicture = $OUTPUT->user_picture($record->user, array('size' => 30, 'class' => 'mr-2', 'link' => false));
             $fullname = fullname($record->user);
             $applicationtext = $record->applytext;
             $attachments = '';

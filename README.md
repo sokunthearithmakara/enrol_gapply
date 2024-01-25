@@ -1,6 +1,8 @@
 # Apply #
 
-A Moodle plugin that allows students to apply for a course.
+TODO Describe the plugin shortly here.
+
+TODO Provide more detailed description here.
 
 ## Installing via uploaded ZIP file ##
 

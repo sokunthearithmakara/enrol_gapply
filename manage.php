@@ -117,7 +117,7 @@ if ($records) {
     // Table head must follow the setting enrol_gapply/showuseridentity.
     $showuseridentity = explode(',', ('firstname,lastname,' . $instance->customtext3));
     // Remove "picture" from the list of fields to show.
-    $showuseridentity = array_diff($showuseridentity, array('picture'));
+    $showuseridentity = array_diff(array_filter($showuseridentity), array('picture'));
     foreach ($showuseridentity as $field) {
         if (strpos($field, 'profile_field_') !== false) {
             $table->head[] = \core_user\fields::get_display_name($field);

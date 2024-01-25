@@ -7,7 +7,7 @@
                 {{#identity}}
                 <dl class="col-sm-6 col-md-4 col-lg-3 mb-2">
                     <dd class="small mb-0">{{name}}</dd>
-                    <dt>{{value}}</dt>
+                    <dt>{{#value}}{{value}}{{/value}}{{^value}}-{{/value}}</dt>
                 </dl>
                 {{/identity}}
                 {{/hasidentity}}
@@ -26,7 +26,7 @@
     </div>
     <div class="card-body m-0 p-0">
         <div style="height: calc(100vh - 4rem - 120px);" class="d-flex">
-            <div class="fileview col-8 bg-light px-0">
+            <div class="fileview col-8 border-right px-0">
                 <div class="select-input px-3"></div>
                 <div id="viewer" class="text-center" style="height: calc(100vh - 7.25rem - 120px); overflow-y: auto;position: relative;">
                 </div>
