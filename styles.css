@@ -1,3 +1,7 @@
 #page-enrol-gapply-manage #page-content .nav-tabs .nav-item:last-child {
     margin-left: auto;
 }
+
+#page-enrol-gapply-manage table.dataTable>tbody>tr.selected>td.select-checkbox:after, table.dataTable>tbody>tr.selected>th.select-checkbox:after{
+    margin-top: -16px;
+}

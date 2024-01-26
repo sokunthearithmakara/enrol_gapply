@@ -16,7 +16,7 @@ export const init = () => {
                                                                 <i class="fa fa-times" aria-hidden="true"></i>
                                                                 </button>
                                                             </div>
-                                                            <div class="modal-body p-0 text-center">
+                                                            <div class="modal-body p-0 text-center d-flex justify-content-center">
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <a href="javascript:void(0)" id="forcedownloadbutton"
@@ -33,13 +33,13 @@ export const init = () => {
         $("#applyfileLabel").html($(this).text());
         $("#applyfile").modal("show");
         if ($(this).data("type").includes("image")) {
-            $("#applyfile .modal-body").html(`<img src="${$(this).data("url")}" class="img-fluid mx-auto">`);
+            $("#applyfile .modal-body").html(`<img src="${$(this).data("url")}" class="img-fluid mx-auto">`).removeClass("d-flex");
         } else if ($(this).data("type").includes("video")) {
             $("#applyfile .modal-body").html(`<video src="${$(this).data("url")}"
                     class="embed-responsive-item text-center m-0" controls width="100%" autoplay></video>`);
         } else if ($(this).data("type").includes("audio")) {
             $("#applyfile .modal-body").html(`<audio src="${$(this).data("url")}"
-                    class="embed-responsive-item text-center m-0" controls width="100%" autoplay></audio>`);
+                    class="embed-responsive-item text-center m-0" controls width="100%" autoplay></audio>`).removeClass("d-flex");
         } else if ($(this).data("type").includes("pdf")) {
             $("#applyfile .modal-body").html(`<object data="${$(this).data("url")}" type="application/pdf"
                      width="100%" style="height: 80vh">
@@ -56,7 +56,7 @@ export const init = () => {
                     class="embed-responsive-item" style="width: 100%; height: 80vh; border-radius: 0"></iframe>`);
         } else {
             $("#applyfile .modal-body").html(`<p
-                    class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', $(this).data("url"))}</p>`);
+                    class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', $(this).data("url"))}</p>`).removeClass("d-flex");
         }
 
         var newURL = new URL($(this).data("url"));

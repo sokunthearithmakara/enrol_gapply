@@ -79,8 +79,8 @@ array('id' => $id, 'tab' => 'rejected')), get_string('rejected', 'enrol_gapply')
 // Edit instance.
 $tabs[] = new tabobject('edit',
 new moodle_url('/enrol/editinstance.php',
-array('id' => $id, 'courseid' => $instance->courseid, "type" => 'gapply')),
-'<i class="fa fa-cog mr-2"></i>' . get_string('edit', 'enrol_gapply'));
+array('id' => $id, 'courseid' => $instance->courseid, "type" => 'gapply', 'returnurl' => '/enrol/gapply/manage.php?id=' . $id . '&tab=' . $tab)),
+'<i class="fa fa-cog mr-2"></i>' . get_string('edit', 'enrol_gapply'), get_string('edit', 'enrol_gapply'));
 $content = '';
 
 // Get records from enrol_gapply table where 'instance' = $id and 'status' is not 'approved'.

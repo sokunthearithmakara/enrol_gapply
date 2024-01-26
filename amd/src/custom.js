@@ -24,7 +24,7 @@ define(
         window.JSZip = JSZip;
         return {
             init: function (tab, id) {
-                // Get current language
+
                 $("body").on('click', 'a[data-type]', function (e) {
                     var modal = `<div class="modal fade" id="applyfile" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="applyfileLabel" aria-modal="true" role="dialog">
                                                     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -35,7 +35,7 @@ define(
                                                                 <i class="fa fa-times" aria-hidden="true"></i>
                                                                 </button>
                                                             </div>
-                                                            <div class="modal-body p-0 text-center">
+                                                            <div class="modal-body p-0 text-center d-flex justify-content-center">
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <a href="javascript:void(0)" id="forcedownloadbutton"
@@ -52,7 +52,7 @@ define(
                     $("#applyfileLabel").html($(this).text());
                     $("#applyfile").modal("show");
                     if ($(this).data("type").includes("image")) {
-                        $("#applyfile .modal-body").html(`<img src="${$(this).data("url")}" class="img-fluid mx-auto">`);
+                        $("#applyfile .modal-body").html(`<img src="${$(this).data("url")}" class="img-fluid mx-auto">`).removeClass("d-flex");
                     } else if ($(this).data("type").includes("video")) {
                         $("#applyfile .modal-body").html(`<video src="${$(this).data("url")}"
                     class="embed-responsive-item text-center m-0" controls width="100%" autoplay></video>`);
@@ -75,7 +75,7 @@ define(
                     class="embed-responsive-item" style="width: 100%; height: 80vh; border-radius: 0"></iframe>`);
                     } else {
                         $("#applyfile .modal-body").html(`<p
-                    class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', $(this).data("url"))}</p>`);
+                    class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', $(this).data("url"))}</p>`).removeClass("d-flex");
                     }
 
                     var newURL = new URL($(this).data("url"));
@@ -181,6 +181,10 @@ define(
                         className: 'select-checkbox',
                         targets: 0,
                         visible: $("#gapplytable").hasClass("approved") ? false : true
+                    },
+                    {
+                        targets: 'userdetails',
+                        className: 'text-truncate',
                     },
                     {
                         "targets": 'inv',
@@ -301,35 +305,43 @@ define(
                         selecteddata = [$(this).data("id")];
                     }
 
-                    // Ajax to get a list of groups
-                    $.ajax({
-                        method: "POST",
-                        url: M.cfg.wwwroot + "/enrol/gapply/ajax.php",
-                        data: {
-                            action: "getgroups",
-                            id: $("#gapplytable").data("instance"),
-                            sesskey: M.cfg.sesskey,
-                        },
-                        dataType: "json",
-                        success: function (data) {
-                            var groupoptions = "";
+                    // If action is approve, we have to get groups first to show in the modal; otherwise, show modal.
+                    if (action == "approve") {
+                        // Get list of groups as a promise
+                        var getGroups = $.ajax({
+                            method: "POST",
+                            url: M.cfg.wwwroot + "/enrol/gapply/ajax.php",
+                            data: {
+                                action: "getgroups",
+                                id: $("#gapplytable").data("instance"),
+                                sesskey: M.cfg.sesskey,
+                            },
+                            dataType: "json",
+                        });
+                    } else {
+                        var getGroups = new Promise((resolve, reject) => {
+                            resolve([]);
+                        });
+                    }
 
-                            if (data.length > 0 && action == "approve") {
-                                data.forEach(function (group) {
-                                    // Render checkbox
-                                    groupoptions += `<div class="custom-control custom-checkbox">
+                    getGroups.then((data) => {
+                        var groupoptions = "";
+                        if (data.length > 0) {
+                            data.forEach(function (group) {
+                                // Render checkbox
+                                groupoptions += `<div class="custom-control custom-checkbox">
                                                         <input type="checkbox" class="custom-control-input groups" id="group-${group.id}" name="groups[]" value="${group.id}">
                                                         <label class="custom-control-label" for="group-${group.id}">${group.name}</label>
                                                         </div>`;
-                                });
+                            });
 
-                                groupoptions = `<div class="form-group mt-3">
+                            groupoptions = `<div class="form-group mt-3">
                                                     <label for="groups">${M.util.get_string('assigngroups', 'enrol_gapply')}</label>
                                                     <div id="groups">${groupoptions}</div>
                                                 </div>`;
-                            }
+                        }
 
-                            var modal = `<div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel"  aria-hidden="true" style="background: rgba(0,0,0,0.5);">
+                        var modal = `<div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel"  aria-hidden="true" style="background: rgba(0,0,0,0.5);">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -350,37 +362,36 @@ define(
                                         </div>
                                     </div>
                                 </div>`;
-                            // Remove any existing modal
-                            $("#approveModal").remove();
-                            $("body").append(modal);
-                            $("#approveModal").modal("show");
+                        // Remove any existing modal
+                        $("#approveModal").remove();
+                        $("body").append(modal);
+                        $("#approveModal").modal("show");
 
-                            // Approve
-                            $("#approveModal #proceed").click(function () {
-                                $("#approveModal").modal("hide");
-                                $("#enrol-gapply-loading").toggleClass("d-none d-flex");
-                                $.ajax({
-                                    url: "/enrol/gapply/ajax.php",
-                                    method: "POST",
-                                    data: {
-                                        action: action,
-                                        ids: selecteddata.toString(),
-                                        id: $("#gapplytable").data("instance"),
-                                        groups: $("#approveModal input.groups:checked").map(function () {
-                                            return this.value;
-                                        }).get().toString(),
-                                        sesskey: M.cfg.sesskey,
-                                    },
-                                    success: function (data) {
-                                        // Reload page
-                                        location.reload();
-                                    },
-                                    error: function (data) {
-                                        location.reload();
-                                    }
-                                });
+                        // Approve
+                        $("#approveModal #proceed").click(function () {
+                            $("#approveModal").modal("hide");
+                            $("#enrol-gapply-loading").toggleClass("d-none d-flex");
+                            $.ajax({
+                                url: "/enrol/gapply/ajax.php",
+                                method: "POST",
+                                data: {
+                                    action: action,
+                                    ids: selecteddata.toString(),
+                                    id: $("#gapplytable").data("instance"),
+                                    groups: $("#approveModal input.groups:checked").map(function () {
+                                        return this.value;
+                                    }).get().toString(),
+                                    sesskey: M.cfg.sesskey,
+                                },
+                                success: function (data) {
+                                    // Reload page
+                                    location.reload();
+                                },
+                                error: function (data) {
+                                    location.reload();
+                                }
                             });
-                        }
+                        });
                     });
                 });
 
@@ -448,21 +459,21 @@ define(
                     class="embed-responsive-item text-center m-0" controls width="100%" autoplay></audio>`);
                             } else if (type.includes("pdf")) {
                                 $(".fileview #viewer").html(`<object data="${url}" type="application/pdf"
-                     width="100%" style="height: calc(100% - 5px);">
-                                            <p>Unable to display PDF file on this device. <a href="${url}">Download</a> instead.</p>
+                     width="100%" style="height: calc(100% - 7px);">
+                                            <p>${M.util.get_string('cannotopenpdffile', 'enrol_gapply', url)}</p>
                                             </object>`);
                             } else if (type.includes("officedocument") || type.includes("msword")
                                 || type.includes("ms-excel") || type.includes("ms-powerpoint") || type.includes("openxmlformats")) {
                                 $(".fileview #viewer").html(`<iframe id="fileviewer"
                     src="https://view.officeapps.live.com/op/embed.aspx?src=${url}"
-                    class="embed-responsive-item" style="width: 100%; height: calc(100% - 5px);"></iframe>`);
+                    class="embed-responsive-item" style="width: 100%; height: calc(100% - 7px);"></iframe>`);
                             } else if (type.includes("text") || type.includes("csv")) {
                                 $(".fileview #viewer").html(`<iframe id="fileviewer"
                     src="https://docs.google.com/viewer?url=${url}&embedded=true"
-                    class="embed-responsive-item" style="width: 100%; height:  calc(100% - 5px); border-radius: 0"></iframe>`);
+                    class="embed-responsive-item" style="width: 100%; height:  calc(100% - 7px); border-radius: 0"></iframe>`);
                             } else {
                                 $(".fileview #viewer").html(`<p
-                    class="text-center py-5">Unable to display file. <a href="${url}">Download</a> instead.</p>`);
+                    class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', url)}</p>`);
                             }
                             $("#userdetailmodalLabel").html(name);
                             $("#downloadbutton").attr("href", url);

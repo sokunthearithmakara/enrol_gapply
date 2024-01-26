@@ -74,14 +74,16 @@ if ($action == "approve") {
         $enrol->send_notification($user, $USER, $message);
     }
     // Update records from enrol_gapply where id in ids to status approved.
-    $DB->set_field_select('enrol_gapply', 'status', 'approved', 'id IN (' . implode(',', $ids) . ')');
+    [$insql, $inparams] = $DB->get_in_or_equal($ids);
+    $DB->set_field_select('enrol_gapply', 'status', 'approved', "id $insql", $inparams);
     die;
 } else if ($action == "waitlist" || $action == "reject") {
     $ids = required_param('ids', PARAM_TEXT);
     $ids = explode(',', $ids);
     $ids = array_map('intval', $ids); // Sanitize the input values
     // Update records from enrol_gapply where id in ids to status waitlisted.
-    $DB->set_field_select('enrol_gapply', 'status', $action . 'ed', 'id IN (' . implode(',', $ids) . ')');
+    [$insql, $inparams] = $DB->get_in_or_equal($ids);
+    $DB->set_field_select('enrol_gapply', 'status', $action . 'ed', "id $insql", $inparams);
     $message = new stdClass();
     $course = $DB->get_record('course', array('id' => $courseid));
     $message->subject = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
@@ -99,7 +101,8 @@ if ($action == "approve") {
     $ids = explode(',', $ids);
     // Get userid  from enrol_gapply where id in ids.
     $ids = array_map('intval', $ids); // Sanitize the input values
-    $userid = $DB->get_fieldset_select('enrol_gapply', 'userid', 'id IN (' . implode(',', $ids) . ')');
+    [$insql, $inparams] = $DB->get_in_or_equal($ids);
+    $userid = $DB->get_fieldset_select('enrol_gapply', 'userid', "id $insql", $inparams);
     // Delete records from enrol_gapply where id in ids.
     $DB->delete_records_list('enrol_gapply', 'id', $ids);
     // Delete files from files.
@@ -111,12 +114,10 @@ if ($action == "approve") {
 } else if ($action == "getuserbyid") {
     $userid = required_param('userid', PARAM_INT);
     require_once($CFG->dirroot . '/user/profile/lib.php');
-    $showuseridentity = explode(',', ('firstname,lastname,' . $instance->customtext3));
-    // Remove empty element.
-    $showuseridentity = array_filter($showuseridentity);
+    $showuseridentity = array_merge(["firstname", 'lastname'], explode(',', $instance->customtext3));
     // Remove picture from array.
     $showuseridentity = array_diff($showuseridentity, array('picture'));
-    $corefields = [];
+    $corefields = ['id', 'firstaccess', 'lastaccess'];
     $customfields = [];
 
     foreach ($showuseridentity as $field) {
@@ -127,7 +128,7 @@ if ($action == "approve") {
         }
     }
 
-    $corefield = 'id, firstaccess, lastaccess, ' . implode(', ', $corefields);
+    $corefield = implode(', ', $corefields);
     $user = $DB->get_record('user', array('id' => $userid), $corefield);
     if (!empty($customfields)) {
         profile_load_custom_fields($user);
@@ -170,12 +171,10 @@ if ($action == "approve") {
 
     if ($records) {
         require_once($CFG->dirroot . '/user/profile/lib.php');
-        $showuseridentity = explode(',', ('firstname,lastname,' . $instance->customtext3));
-        // Remove empty array.
-        $showuseridentity = array_filter($showuseridentity);
+        $showuseridentity = array_merge(["firstname", 'lastname'], explode(',', $instance->customtext3));
         // Remove picture from array.
         $showuseridentity = array_diff($showuseridentity, array('picture'));
-        $corefields = [];
+        $corefields = ["id"];
         $customfields = [];
 
         foreach ($showuseridentity as $field) {
@@ -186,7 +185,7 @@ if ($action == "approve") {
             }
         }
 
-        $corefield = 'id, ' . implode(', ', $corefields);
+        $corefield = implode(', ', $corefields);
 
         $fs = get_file_storage();
 
