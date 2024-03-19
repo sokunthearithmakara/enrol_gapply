@@ -122,7 +122,7 @@ if ($records) {
         if (strpos($field, 'profile_field_') !== false) {
             $table->head[] = \core_user\fields::get_display_name($field);
         } else {
-            $table->head[] = get_string($field);
+            $table->head[] = get_string($field, 'moodle');
         }
         $table->colclasses[] = $field . ' exportable colvis inv profilefield';
         $table->align[] = 'left';
@@ -132,10 +132,10 @@ if ($records) {
         get_string('applicationdetails', 'enrol_gapply'),
         get_string('applicationtext', 'enrol_gapply'),
         get_string('applicationattachment', 'enrol_gapply'),
-        get_string('status'),
-        get_string('date'),
-        get_string('timecreated'),
-        get_string('action')
+        get_string('status','moodle'),
+        get_string('date', 'moodle'),
+        get_string('timecreated', 'moodle'),
+        get_string('action', 'moodle')
     ));
 
     $table->colclasses = array_merge($table->colclasses, array(
