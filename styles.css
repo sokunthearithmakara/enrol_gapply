@@ -1,7 +1,12 @@
-#page-enrol-gapply-manage #page-content .nav-tabs .nav-item:last-child {
+#page-enrol-gapply-manage #page-content .nav-tabs .nav-item:nth-last-child(2) {
     margin-left: auto;
+
+    & a {
+        color: #000;
+    }
 }
 
-#page-enrol-gapply-manage table.dataTable>tbody>tr.selected>td.select-checkbox:after, table.dataTable>tbody>tr.selected>th.select-checkbox:after{
+#page-enrol-gapply-manage table.dataTable>tbody>tr.selected>td.select-checkbox:after,
+table.dataTable>tbody>tr.selected>th.select-checkbox:after {
     margin-top: -16px;
 }

@@ -169,7 +169,7 @@ class enrol_gapply_plugin extends enrol_plugin
         $mform->addHelpButton('name', 'name', 'enrol_gapply');
 
         // Instruction textbox.
-        $mform->addElement('editor', 'customtext1', get_string('description', 'enrol_gapply'), array('rows' => 4));
+        $mform->addElement('editor', 'customtext1', get_string('description', 'enrol_gapply'), array('rows' => 10));
         $mform->setType('customtext1', PARAM_RAW);
 
         // Set default value.
@@ -247,6 +247,17 @@ class enrol_gapply_plugin extends enrol_plugin
         if ($instance != null && isset($instance->customtext3)) {
             $mform->setDefault('customtext3', explode(',', $instance->customtext3));
         }
+
+        // 1.0.4 Update limit seats.
+        $mform->addElement('text', 'customchar1', get_string('availableseats', 'enrol_gapply'), array('size' => '10'));
+        $mform->setType('customchar1', PARAM_INT);
+        $mform->addHelpButton('customchar1', 'availableseats', 'enrol_gapply');
+        $mform->addRule('customchar1', null, 'numeric', null, 'client');
+        $mform->setDefault('customchar1', 0);
+
+        // Allow user to apply even seats are full.
+        $mform->addElement('advcheckbox', 'customchar2', get_string('allowoverenrol', 'enrol_gapply'), null, array(0, 1));
+        $mform->setDefault('customchar2', 0);
 
         // Submission header.
         $mform->addElement('header', 'submission', get_string('applicationattachment', 'enrol_gapply'));
@@ -496,6 +507,20 @@ class enrol_gapply_plugin extends enrol_plugin
             $return .= html_writer::end_tag('div');
 
             return $return;
+        }
+
+        // Check seats availability.
+        $enrolledusers = count_enrolled_users(context_course::instance($instance->courseid), 'mod/assign:submit');
+        $availableseats = $instance->customchar1;
+        $allowoverenrol = $instance->customchar2;
+        if ($availableseats > 0 && $enrolledusers >= $availableseats && !$allowoverenrol) {
+            return $OUTPUT->render_from_template(
+                'enrol_gapply/status',
+                array(
+                    'full' => true,
+                    'availableseats' => $availableseats
+                )
+            );
         }
 
         if ($instance->customint7 > 0 && $instance->customint7 > time()) {

@@ -29,7 +29,8 @@ require_once($CFG->libdir . '/formslib.php');
 /**
  * Form to enrol a user in a course
  */
-class enrol_gapply_form extends moodleform {
+class enrol_gapply_form extends moodleform
+{
     /**
      * instance of enrol plugin
      *
@@ -42,7 +43,8 @@ class enrol_gapply_form extends moodleform {
      *
      * @return string form identifier
      */
-    protected function get_form_identifier() {
+    protected function get_form_identifier()
+    {
         $formid = $this->_customdata["instance"]->id;
         return $formid;
     }
@@ -50,7 +52,8 @@ class enrol_gapply_form extends moodleform {
     /**
      * Form definition
      */
-    public function definition() {
+    public function definition()
+    {
         global $USER, $PAGE;
 
         $context = context_system::instance();
@@ -69,27 +72,33 @@ class enrol_gapply_form extends moodleform {
 
         $mform->addElement('header', 'selfheader-' . parent::get_form_identifier(), format_text($heading, FORMAT_HTML));
 
+        $enrolledusers = count_enrolled_users(context_course::instance($instance->courseid), 'mod/assign:submit');
+        $availableseats = $instance->customchar1;
+        $seat = $availableseats - $enrolledusers;
+        $seat = $seat < 0 ? 0 : $seat;
+
+        $infohtml = '<div class="alert alert-info" role="alert">';
+
         if ($instance->customtext1 != null) {
-            $mform->addElement('html',
-            '<div class="alert alert-info" role="alert">'
-            . format_text($instance->customtext1, FORMAT_HTML)
-            . ($instance->customint8 > 0 ? '<p class="mb-0">'
-            . get_string('applicationends', 'enrol_gapply', userdate($instance->customint8)) . '</p>' : '')
-            . '</div>');
-        } else {
-            if ($instance->customint8 > 0) {
-                $mform->addElement('html',
-                '<div class="alert alert-info" role="alert">'
-                . get_string('applicationends', 'enrol_gapply', userdate($instance->customint8))
-                . '</div>');
-            }
+            $infohtml .= format_text($instance->customtext1, FORMAT_HTML);
+        }
+        if ($instance->customint8 > 0) {
+            $infohtml .= get_string('applicationends', 'enrol_gapply', userdate($instance->customint8));
         }
 
+        $infohtml .= '<div>' . get_string('availableseats', 'enrol_gapply') . ': <b>' . ($instance->customchar1 == 0 ? get_string('unlimitedseats', 'enrol_gapply') : $seat) . '</b></div>';
+
+        $infohtml .= '</div>';
+
+        $mform->addElement('html', $infohtml);
+
         if (($instance->customint1 == 0 && $instance->customint3 == 1) || $instance->customint1 == 1) {
-            $mform->addElement('editor',
-            'applytext',
-            get_string('applicationtext', 'enrol_gapply'),
-            array('rows' => 4, 'cols' => 100, 'class' => 'w-100'));
+            $mform->addElement(
+                'editor',
+                'applytext',
+                get_string('applicationtext', 'enrol_gapply'),
+                array('rows' => 10, 'cols' => 100, 'class' => 'w-100')
+            );
             $mform->setType('applytext', PARAM_RAW);
             if ($instance->customint1 == 1) {
                 $mform->addRule('applytext', null, 'required', null, 'client');
@@ -111,11 +120,13 @@ class enrol_gapply_form extends moodleform {
             }
         }
 
-        $mform->addElement('html',
-        '<div class="d-flex align-items-center justify-content-center">
+        $mform->addElement(
+            'html',
+            '<div class="d-flex align-items-center justify-content-center">
         <button type="submit" name="submit" value="" class="text-uppercase font-weight-bold btn btn-primary mb-3">'
-        .'<i class="fa fa-send mr-2"></i><span class="text-uppercase font-weight-bold">'
-        . get_string('apply', 'enrol_gapply') . '</span></button></div>');
+                . '<i class="fa fa-send mr-2"></i><span class="text-uppercase font-weight-bold">'
+                . get_string('apply', 'enrol_gapply') . '</span></button></div>'
+        );
 
         $this->set_display_vertical();
 

@@ -76,6 +76,15 @@ array('id' => $id, 'tab' => 'waitlisted')), get_string('waitlisted', 'enrol_gapp
 $tabs[] = new tabobject('rejected',
 new moodle_url('/enrol/gapply/manage.php',
 array('id' => $id, 'tab' => 'rejected')), get_string('rejected', 'enrol_gapply'));
+// Seats.
+$enrolled = count_enrolled_users($coursecontext, 'mod/assign:submit');
+$seats = get_string('unlimitedseats', 'enrol_gapply');
+if ($instance->customchar1 > 0) {
+    $seats = $instance->customchar1;
+}
+
+$tabs[] = new tabobject('seats',
+"javascript:void(0);", get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats]));
 // Edit instance.
 $tabs[] = new tabobject('edit',
 new moodle_url('/enrol/editinstance.php',
