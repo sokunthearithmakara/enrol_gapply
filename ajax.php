@@ -114,7 +114,10 @@ if ($action == "approve") {
 } else if ($action == "getuserbyid") {
     $userid = required_param('userid', PARAM_INT);
     require_once($CFG->dirroot . '/user/profile/lib.php');
-    $showuseridentity = array_merge(["firstname", 'lastname'], explode(',', $instance->customtext3));
+    $showuseridentity = ["firstname", 'lastname'];
+    if ($instance->customtext3) {
+        $showuseridentity = array_merge($showuseridentity, explode(',', $instance->customtext3));
+    }
     // Remove picture from array.
     $showuseridentity = array_diff($showuseridentity, array('picture'));
     $corefields = ['id', 'firstaccess', 'lastaccess'];
@@ -171,7 +174,11 @@ if ($action == "approve") {
 
     if ($records) {
         require_once($CFG->dirroot . '/user/profile/lib.php');
-        $showuseridentity = array_merge(["firstname", 'lastname'], explode(',', $instance->customtext3));
+        $showuseridentity = ["firstname", 'lastname'];
+        if ($instance->customtext3) {
+            $showuseridentity = array_merge($showuseridentity, explode(',', $instance->customtext3));
+        }
+
         // Remove picture from array.
         $showuseridentity = array_diff($showuseridentity, array('picture'));
         $corefields = ["id"];
@@ -185,6 +192,7 @@ if ($action == "approve") {
             }
         }
 
+        $corefields = array_filter($corefields);
         $corefield = implode(', ', $corefields);
 
         $fs = get_file_storage();
