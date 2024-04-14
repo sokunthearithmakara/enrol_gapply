@@ -192,7 +192,6 @@ if ($action == "approve") {
             }
         }
 
-        $corefields = array_filter($corefields);
         $corefield = implode(', ', $corefields);
 
         $fs = get_file_storage();
