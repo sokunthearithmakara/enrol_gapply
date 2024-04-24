@@ -131,7 +131,7 @@ define(
                         // Csv button
                         {
                             extend: "csvHtml5",
-                            text: '<i class="fa fa-file-csv fa-fw"></i>',
+                            text: '<i class="fa fa-file-code-o fa-fw"></i>',
                             titleAttr: "",
                             className: "btn btn-sm btn-alt-primary",
                             exportOptions: {
@@ -141,7 +141,7 @@ define(
                         // Excel button
                         {
                             extend: "excelHtml5",
-                            text: '<i class="fa fa-file-excel fa-fw"></i>',
+                            text: '<i class="fa fa-file-excel-o fa-fw"></i>',
                             titleAttr: "",
                             className: "btn btn-sm btn-alt-primary",
                             exportOptions: {
@@ -275,7 +275,7 @@ define(
                     if (selecteddata.length > 0) {
                         $("#gapplytable_length label").after(`
                             <button class="btn btn-sm alert-success action-button" data-action="approve" data-toggle="tooltip" title="${M.util.get_string("approve", "enrol_gapply")}"><i class="fa fa-fw fa-check"></i></button>
-                            <button class="btn btn-sm alert-info action-button" data-action="waitlist" data-toggle="tooltip" title="${M.util.get_string("waitlist", "enrol_gapply")}"><i class="fa fa-fw fa-stopwatch"></i></button>
+                            <button class="btn btn-sm alert-info action-button" data-action="waitlist" data-toggle="tooltip" title="${M.util.get_string("waitlist", "enrol_gapply")}"><i class="fa fa-fw fa-clock-o"></i></button>
                             <button class="btn btn-sm alert-warning action-button" data-action="reject" data-toggle="tooltip" title="${M.util.get_string("reject", "enrol_gapply")}"><i class="fa fa-fw fa-times"></i></button>
                             <button class="btn btn-sm alert-danger action-button" data-action="delete" data-toggle="tooltip" title="${M.util.get_string("delete", "enrol_gapply")}"><i class="fa fa-fw fa-trash"></i></button>`
                         );
