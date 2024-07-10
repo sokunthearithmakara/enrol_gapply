@@ -27,14 +27,12 @@ defined('MOODLE_INTERNAL') || die();
 $capabilities = array(
 
     'enrol/gapply:config' => array(
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-
-        )
+        ),
     ),
 
     'enrol/gapply:manage' => array(
@@ -43,7 +41,7 @@ $capabilities = array(
         'archetypes' => array(
             'manager' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-        )
+        ),
     ),
 
     'enrol/gapply:unenrol' => array(
@@ -52,7 +50,7 @@ $capabilities = array(
         'archetypes' => array(
             'manager' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-        )
+        ),
     ),
 
     'enrol/gapply:unenrolself' => array(
@@ -62,6 +60,6 @@ $capabilities = array(
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-        )
+        ),
     ),
 );
