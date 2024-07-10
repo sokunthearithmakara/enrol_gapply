@@ -278,7 +278,7 @@ if ($action == "approve") {
             'data-id' => $record->id));
 
             $action .= html_writer::link('javascript:void(0)',
-            '<i class="icon fa fa-stopwatch fa-fw" aria-hidden="true"></i>'
+                '<i class="icon fa fa-clock-o fa-fw" aria-hidden="true"></i>'
             . get_string('waitlist', 'enrol_gapply'),
             array('class' => 'dropdown-item menu-action action-button',
             'data-action' => 'waitlist',
@@ -327,7 +327,7 @@ if ($action == "approve") {
                 $status,
                 $date,
                 $record->timecreated,
-                $action
+                $action,
             ));
             $table->data[] = $data;
         }

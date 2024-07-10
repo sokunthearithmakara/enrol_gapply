@@ -24,47 +24,49 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot . '/user/profile/lib.php');
+
+// Basic fields available in user table.
+$fields = [
+    'username'    => new lang_string('username'),
+    'idnumber'    => new lang_string('idnumber'),
+    'email'       => new lang_string('email'),
+    'phone1'      => new lang_string('phone1'),
+    'phone2'      => new lang_string('phone2'),
+    'department'  => new lang_string('department'),
+    'institution' => new lang_string('institution'),
+    'city'        => new lang_string('city'),
+    'country'     => new lang_string('country'),
+];
+
+// Custom profile fields.
+$profilefields = profile_get_custom_fields();
+foreach ($profilefields as $field) {
+    $fields['profile_field_' . $field->shortname] = format_string(
+        $field->name,
+        true
+    ) . ' *';
+}
 
 if ($hassiteconfig) {
     $settings = new admin_settingpage('enrol_gapply_settings', new lang_string('pluginname', 'enrol_gapply'));
 
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
+        // Set as default enrolment for new courses.
+        $settings->add(new admin_setting_configcheckbox(
+            'enrol_gapply/defaultenrol',
+            get_string('defaultenrol', 'enrol'),
+            get_string('defaultenrol_desc', 'enrol'),
+            1
+        ));
         // Create a multiple select box for the list of profile fields both core and custom profile fields.
         $settings->add(new admin_setting_configmultiselect(
             'enrol_gapply/showuseridentity',
             new lang_string('showuseridentity', 'enrol_gapply'),
             new lang_string('showuseridentity_desc', 'enrol_gapply'),
             ['email' => 1],
-            function () {
-                global $CFG;
-                require_once($CFG->dirroot . '/user/profile/lib.php');
-
-                // Basic fields available in user table.
-                $fields = [
-                    'username'    => new lang_string('username'),
-                    'idnumber'    => new lang_string('idnumber'),
-                    'email'       => new lang_string('email'),
-                    'phone1'      => new lang_string('phone1'),
-                    'phone2'      => new lang_string('phone2'),
-                    'department'  => new lang_string('department'),
-                    'institution' => new lang_string('institution'),
-                    'city'        => new lang_string('city'),
-                    'country'     => new lang_string('country'),
-                ];
-
-                // Custom profile fields.
-                $profilefields = profile_get_custom_fields();
-                foreach ($profilefields as $field) {
-                    $fields['profile_field_' . $field->shortname] = format_string(
-                        $field->name,
-                        true
-                    ) . ' *';
-                }
-
-                return $fields;
-            }
+            $fields
         ));
-
     }
 }

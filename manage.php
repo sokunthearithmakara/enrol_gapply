@@ -61,21 +61,41 @@ $PAGE->set_pagelayout('incourse');
 // Create tabs.
 $tabs = array();
 // New Applications.
-$tabs[] = new tabobject('new',
-new moodle_url('/enrol/gapply/manage.php',
-array('id' => $id, 'tab' => 'new')), get_string('new', 'enrol_gapply'));
+$tabs[] = new tabobject(
+    'new',
+    new moodle_url(
+        '/enrol/gapply/manage.php',
+        array('id' => $id, 'tab' => 'new')
+    ),
+    get_string('new', 'enrol_gapply')
+);
 // Approved Applications.
-$tabs[] = new tabobject('approved',
-new moodle_url('/enrol/gapply/manage.php',
-array('id' => $id, 'tab' => 'approved')), get_string('approved', 'enrol_gapply'));
+$tabs[] = new tabobject(
+    'approved',
+    new moodle_url(
+        '/enrol/gapply/manage.php',
+        array('id' => $id, 'tab' => 'approved')
+    ),
+    get_string('approved', 'enrol_gapply')
+);
 // Waitlisted Applications.
-$tabs[] = new tabobject('waitlisted',
-new moodle_url('/enrol/gapply/manage.php',
-array('id' => $id, 'tab' => 'waitlisted')), get_string('waitlisted', 'enrol_gapply'));
+$tabs[] = new tabobject(
+    'waitlisted',
+    new moodle_url(
+        '/enrol/gapply/manage.php',
+        array('id' => $id, 'tab' => 'waitlisted')
+    ),
+    get_string('waitlisted', 'enrol_gapply')
+);
 // Rejected Applications.
-$tabs[] = new tabobject('rejected',
-new moodle_url('/enrol/gapply/manage.php',
-array('id' => $id, 'tab' => 'rejected')), get_string('rejected', 'enrol_gapply'));
+$tabs[] = new tabobject(
+    'rejected',
+    new moodle_url(
+        '/enrol/gapply/manage.php',
+        array('id' => $id, 'tab' => 'rejected')
+    ),
+    get_string('rejected', 'enrol_gapply')
+);
 // Seats.
 $enrolled = count_enrolled_users($coursecontext, 'mod/assign:submit');
 $seats = get_string('unlimitedseats', 'enrol_gapply');
@@ -83,13 +103,21 @@ if ($instance->customchar1 > 0) {
     $seats = $instance->customchar1;
 }
 
-$tabs[] = new tabobject('seats',
-"javascript:void(0);", get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats]));
+$tabs[] = new tabobject(
+    'seats',
+    "javascript:void(0);",
+    get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
+);
 // Edit instance.
-$tabs[] = new tabobject('edit',
-new moodle_url('/enrol/editinstance.php',
-array('id' => $id, 'courseid' => $instance->courseid, "type" => 'gapply', 'returnurl' => '/enrol/gapply/manage.php?id=' . $id . '&tab=' . $tab)),
-'<i class="fa fa-cog mr-2"></i>' . get_string('edit', 'enrol_gapply'), get_string('edit', 'enrol_gapply'));
+$tabs[] = new tabobject(
+    'edit',
+    new moodle_url(
+        '/enrol/editinstance.php',
+        array('id' => $id, 'courseid' => $instance->courseid, "type" => 'gapply', 'returnurl' => '/enrol/gapply/manage.php?id=' . $id . '&tab=' . $tab)
+    ),
+    '<i class="fa fa-cog mr-2"></i>' . get_string('edit', 'enrol_gapply'),
+    get_string('edit', 'enrol_gapply')
+);
 $content = '';
 
 // Get records from enrol_gapply table where 'instance' = $id and 'status' is not 'approved'.
@@ -141,10 +169,10 @@ if ($records) {
         get_string('applicationdetails', 'enrol_gapply'),
         get_string('applicationtext', 'enrol_gapply'),
         get_string('applicationattachment', 'enrol_gapply'),
-        get_string('status','moodle'),
-        get_string('date', 'moodle'),
-        get_string('timecreated', 'moodle'),
-        get_string('action', 'moodle')
+        get_string('status'),
+        get_string('date'),
+        get_string('timecreated'),
+        get_string('action'),
     ));
 
     $table->colclasses = array_merge($table->colclasses, array(
@@ -154,7 +182,7 @@ if ($records) {
         'status inv exportable',
         'date exportable noorder',
         'timecreated inv',
-        'action noorder' . ($tab == 'approved' ? ' inv' : '')
+        'action noorder' . ($tab == 'approved' ? ' inv' : ''),
     ));
 
     $table->align = array_merge($table->align, array(
@@ -164,7 +192,7 @@ if ($records) {
         'left',
         'left',
         'left',
-        'right'
+        'right',
     ));
 
     $table->data = array();
