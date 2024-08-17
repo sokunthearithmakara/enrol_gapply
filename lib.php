@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * Class enrol_gapply_plugin.
  */
 class enrol_gapply_plugin extends enrol_plugin {
+
     /**
      * Return an array of action icons for the instance.
      *
@@ -212,7 +213,6 @@ class enrol_gapply_plugin extends enrol_plugin {
 
         $profilefields = get_config('enrol_gapply', 'showuseridentity');
         $profilefields = explode(',', $profilefields);
-        // Remove the empty value.
         // Remove the empty value.
         $profilefields = array_filter($profilefields);
         $profilefields[] = 'picture';
@@ -617,7 +617,6 @@ class enrol_gapply_plugin extends enrol_plugin {
             return false;
         } else if ($data = $mform->get_data()) {
             $data->applytext = isset($data->applytext) ? $data->applytext['text'] : '';
-            $data->applytext = isset($data->applytext) ? $data->applytext['text'] : '';
             $data->format = 1;
             $data->status = 'new';
             $data->usermodified = $data->userid;
@@ -647,7 +646,6 @@ class enrol_gapply_plugin extends enrol_plugin {
             // Notify course contact (teachers) that a new application has been submitted.
             $coursecontacts = get_users_by_capability(
                 $filecontext,
-                'enrol/gapply:manage',
                 'enrol/gapply:manage',
                 '',
                 'u.lastname ASC, u.firstname ASC',
@@ -744,7 +742,6 @@ class enrol_gapply_plugin extends enrol_plugin {
             }
         }
 
-        $fields['customtext1'] = $fields['customtext1'] ? $fields['customtext1']['text'] : '';
         $fields['customtext1'] = $fields['customtext1'] ? $fields['customtext1']['text'] : '';
         $fields['customtext3'] = implode(',', $fields['customtext3']);
         return parent::add_instance($course, $fields);
@@ -903,34 +900,6 @@ class enrol_gapply_plugin extends enrol_plugin {
 
         return $fields;
     }
-
-    /**
-     * Add new instance of enrol plugin with default settings.
-     * @param stdClass $course
-     * @return int id of new instance
-     */
-    public function add_default_instance($course) {
-        $fields = $this->get_instance_defaults();
-        return $this->add_instance($course, $fields);
-    }
-
-    /**
-     * Returns defaults for new instances.
-     * @return array
-     */
-    public function get_instance_defaults() {
-        $fields = [];
-        $fields['name'] = get_string('pluginname', 'enrol_gapply');
-        $fields['customtext1'] = [
-            'text' => '',
-        ];
-
-        $fields['customtext3'] = [];
-        $fields['customint1'] = 0;
-        $fields['customint2'] = 0;
-
-        return $fields;
-    }
 }
 
 /**
@@ -975,7 +944,6 @@ function enrol_gapply_pluginfile($course, $cm, $context, $filearea, $args, $forc
  * @param stdClass $course The course to object for the report
  * @param context $context The context of the course
  */
-function enrol_gapply_extend_navigation_course(\navigation_node $navigation, \stdClass $course, \context $context) {
 function enrol_gapply_extend_navigation_course(\navigation_node $navigation, \stdClass $course, \context $context) {
     // Get enrolment instance.
     if (!has_capability('enrol/gapply:manage', $context)) {
@@ -1027,7 +995,6 @@ class enrol_gapply_emptyform extends moodleform {
  */
 function enrol_gapply_before_footer() {
     global $PAGE;
-    // Check page id; if equal to page-enrol-gapply-manage then add loading.
     // Check page id; if equal to page-enrol-gapply-manage then add loading.
     if ($PAGE->bodyid == 'page-enrol-gapply-manage') {
         $loading = '<div id="enrol-gapply-loading" class="d-none align-items-center justify-content-center position-fixed w-100 h-100"
