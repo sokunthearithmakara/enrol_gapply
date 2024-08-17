@@ -29,8 +29,8 @@ require_once($CFG->libdir . '/formslib.php');
 /**
  * Form to enrol a user in a course
  */
-class enrol_gapply_form extends moodleform
-{
+class enrol_gapply_form extends moodleform {
+
     /**
      * instance of enrol plugin
      *
@@ -43,8 +43,7 @@ class enrol_gapply_form extends moodleform
      *
      * @return string form identifier
      */
-    protected function get_form_identifier()
-    {
+    protected function get_form_identifier() {
         $formid = $this->_customdata["instance"]->id;
         return $formid;
     }
@@ -52,8 +51,7 @@ class enrol_gapply_form extends moodleform
     /**
      * Form definition
      */
-    public function definition()
-    {
+    public function definition() {
         global $USER, $PAGE;
 
         $context = context_system::instance();
@@ -97,7 +95,7 @@ class enrol_gapply_form extends moodleform
                 'editor',
                 'applytext',
                 get_string('applicationtext', 'enrol_gapply'),
-                array('rows' => 10, 'cols' => 100, 'class' => 'w-100')
+                ['rows' => 10, 'cols' => 100, 'class' => 'w-100']
             );
             $mform->setType('applytext', PARAM_RAW);
             if ($instance->customint1 == 1) {
@@ -110,7 +108,7 @@ class enrol_gapply_form extends moodleform
                 'subdirs' => 0,
                 'maxbytes' => $instance->customint6,
                 'maxfiles' => $instance->customint5,
-                'accepted_types' => !empty($instance->customtext2) ? explode(',', $instance->customtext2) : '*'
+                'accepted_types' => !empty($instance->customtext2) ? explode(',', $instance->customtext2) : '*',
             ];
 
             $mform->addElement('filemanager', 'applyfile', get_string('applicationattachment', 'enrol_gapply'), null, $options);

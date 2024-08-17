@@ -32,7 +32,7 @@ require_sesskey();
 
 $action = required_param('action', PARAM_TEXT);
 $id = required_param('id', PARAM_INT);
-$instance = $DB->get_record('enrol', array('id' => $id), '*', MUST_EXIST);
+$instance = $DB->get_record('enrol', ['id' => $id], '*', MUST_EXIST);
 $courseid = $instance->courseid;
 
 $context = context_course::instance($courseid);
@@ -53,14 +53,14 @@ if ($action == "approve") {
     $records = $DB->get_records_list('enrol_gapply', 'id', $ids);
 
     $message = new stdClass();
-    $course = $DB->get_record('course', array('id' => $courseid));
+    $course = $DB->get_record('course', ['id' => $courseid]);
     $message->subject = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
     $message->text = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
-    $message->contexturl = new moodle_url('/course/view.php', array('id' => $courseid));
+    $message->contexturl = new moodle_url('/course/view.php', ['id' => $courseid]);
     $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
 
     foreach ($records as $record) {
-        $instance = $DB->get_record('enrol', array('id' => $id));
+        $instance = $DB->get_record('enrol', ['id' => $id]);
         $enrol->enrol_user($instance, $record->userid, 5, $instance->enrolstartdate, $instance->enrolenddate);
         // Add user to selected groups.
         $groups = optional_param('groups', '', PARAM_TEXT);
@@ -70,7 +70,7 @@ if ($action == "approve") {
                 groups_add_member($groupid, $record->userid);
             }
         }
-        $user = $DB->get_record('user', array('id' => $record->userid));
+        $user = $DB->get_record('user', ['id' => $record->userid]);
         $enrol->send_notification($user, $USER, $message);
     }
     // Update records from enrol_gapply where id in ids to status approved.
@@ -85,14 +85,14 @@ if ($action == "approve") {
     [$insql, $inparams] = $DB->get_in_or_equal($ids);
     $DB->set_field_select('enrol_gapply', 'status', $action . 'ed', "id $insql", $inparams);
     $message = new stdClass();
-    $course = $DB->get_record('course', array('id' => $courseid));
+    $course = $DB->get_record('course', ['id' => $courseid]);
     $message->subject = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
     $message->text = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
-    $message->contexturl = new moodle_url('/course/view.php', array('id' => $courseid));
+    $message->contexturl = new moodle_url('/course/view.php', ['id' => $courseid]);
     $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
     $records = $DB->get_records_list('enrol_gapply', 'id', $ids);
     foreach ($records as $record) {
-        $user = $DB->get_record('user', array('id' => $record->userid));
+        $user = $DB->get_record('user', ['id' => $record->userid]);
         $enrol->send_notification($user, $USER, $message);
     }
     die;
@@ -119,7 +119,7 @@ if ($action == "approve") {
         $showuseridentity = array_merge($showuseridentity, explode(',', $instance->customtext3));
     }
     // Remove picture from array.
-    $showuseridentity = array_diff($showuseridentity, array('picture'));
+    $showuseridentity = array_diff($showuseridentity, ['picture']);
     $corefields = ['id', 'firstaccess', 'lastaccess'];
     $customfields = [];
 
@@ -132,16 +132,16 @@ if ($action == "approve") {
     }
 
     $corefield = implode(', ', $corefields);
-    $user = $DB->get_record('user', array('id' => $userid), $corefield);
+    $user = $DB->get_record('user', ['id' => $userid], $corefield);
     if (!empty($customfields)) {
         profile_load_custom_fields($user);
     }
 
-    $user->picture = $OUTPUT->user_picture($user, array('size' => 64, 'class' => 'mr-2', 'link' => false));
+    $user->picture = $OUTPUT->user_picture($user, ['size' => 64, 'class' => 'mr-2', 'link' => false]);
     $user->fullname = fullname($user);
     $user->membersince = userdate($user->firstaccess, get_string('strftimedate'));
     $user->lastaccess = userdate($user->lastaccess, get_string('strftimedate'));
-    $identity = array();
+    $identity = [];
     foreach ($showuseridentity as $field) {
         $item = new stdClass();
         if (in_array($field, $customfields)) {
@@ -158,10 +158,10 @@ if ($action == "approve") {
     die;
 } else if ($action == "getgroups") {
     $groups = groups_get_all_groups($courseid, 0, 0, 'g.id, g.name');
-    $groupsdata = array();
+    $groupsdata = [];
     foreach ($groups as $group) {
         $group->name = format_text($group->name, FORMAT_PLAIN);
-        $groupsdata[] = array('id' => $group->id, 'name' => $group->name);
+        $groupsdata[] = ['id' => $group->id, 'name' => $group->name];
     }
     echo json_encode($groupsdata);
     die;
@@ -170,7 +170,7 @@ if ($action == "approve") {
     $tab = required_param('tab', PARAM_TEXT);
     // Get records from enrol_gapply table where 'instance' = $id and 'status' is not 'approved'.
     $sql = "SELECT * FROM {enrol_gapply} WHERE instance = ? AND status = ?";
-    $records = $DB->get_records_sql($sql, array($id, $tab));
+    $records = $DB->get_records_sql($sql, [$id, $tab]);
 
     if ($records) {
         require_once($CFG->dirroot . '/user/profile/lib.php');
@@ -180,7 +180,7 @@ if ($action == "approve") {
         }
 
         // Remove picture from array.
-        $showuseridentity = array_diff($showuseridentity, array('picture'));
+        $showuseridentity = array_diff($showuseridentity, ['picture']);
         $corefields = ["id"];
         $customfields = [];
 
@@ -198,7 +198,7 @@ if ($action == "approve") {
 
         foreach ($records as $record) {
             // Create an array for attachments.
-            $attachments = array();
+            $attachments = [];
 
             if ($files = $fs->get_area_files($context->id, 'enrol_gapply', 'applyfile', $id . $record->userid, 'filename', false)) {
 
@@ -217,7 +217,7 @@ if ($action == "approve") {
                 }
             }
             $record->attachments = $attachments;
-            $record->user = $DB->get_record('user', array('id' => $record->userid), $corefield);
+            $record->user = $DB->get_record('user', ['id' => $record->userid], $corefield);
             // Load profile fields data to user object if there is any.
             if (!empty($customfields)) {
                 profile_load_custom_fields($record->user);
@@ -228,17 +228,17 @@ if ($action == "approve") {
         $table->data = [];
 
         foreach ($records as $record) {
-            $userpicture = $OUTPUT->user_picture($record->user, array('size' => 30, 'class' => 'mr-2', 'link' => false));
+            $userpicture = $OUTPUT->user_picture($record->user, ['size' => 30, 'class' => 'mr-2', 'link' => false]);
             $fullname = fullname($record->user);
             $applicationtext = $record->applytext;
             $attachments = '';
             foreach ($record->attachments as $attachment) {
                 $attachments .= html_writer::link('javascript:void(0)', '<i class="fa fa-fw fa-paperclip mr-1"></i>'
-                . $attachment->filename, array('class' => 'small attachmentlink',
+                . $attachment->filename, ['class' => 'small attachmentlink',
                  'data-type' => $attachment->mimetype,
                  'data-url' => $attachment->url,
                  'data-userid' => $record->userid,
-                 'data-id' => $record->id))
+                 'data-id' => $record->id])
                 . '<br>';
             }
             $applicationdetails = '<div style="min-width: 500px; max-width: 100%">';
@@ -258,50 +258,50 @@ if ($action == "approve") {
             $date = userdate($record->timecreated, '%d/%m/%Y, %H:%M');
             $action = '';
             // Render action menu.
-            $action .= html_writer::start_tag('div', array('class' => 'dropdown'));
+            $action .= html_writer::start_tag('div', ['class' => 'dropdown']);
             $action .= html_writer::start_tag('button',
-            array('class' => 'btn btn-icon d-flex align-items-center justify-content-center icon-no-margin ml-auto',
+            ['class' => 'btn btn-icon d-flex align-items-center justify-content-center icon-no-margin ml-auto',
             'type' => 'button',
             'data-toggle' => 'dropdown',
             'data-boundary' => 'window',
             'aria-haspopup' => 'true',
-            'aria-expanded' => 'false'));
+            'aria-expanded' => 'false']);
             $action .= '<i class="icon fa fa-ellipsis-v fa-fw" title="Edit" role="img" aria-label="Edit"></i>';
             $action .= html_writer::end_tag('button');
-            $action .= html_writer::start_tag('ul', array('class' => 'dropdown-menu menu dropdown-menu-right'));
+            $action .= html_writer::start_tag('ul', ['class' => 'dropdown-menu menu dropdown-menu-right']);
 
             $action .= html_writer::link('javascript:void(0)',
             '<i class="icon fa fa-check fa-fw" aria-hidden="true"></i>'
             . get_string('approve', 'enrol_gapply'),
-            array('class' => 'dropdown-item menu-action action-button',
+            ['class' => 'dropdown-item menu-action action-button',
             'data-action' => 'approve',
-            'data-id' => $record->id));
+            'data-id' => $record->id]);
 
             $action .= html_writer::link('javascript:void(0)',
                 '<i class="icon fa fa-clock-o fa-fw" aria-hidden="true"></i>'
             . get_string('waitlist', 'enrol_gapply'),
-            array('class' => 'dropdown-item menu-action action-button',
+            ['class' => 'dropdown-item menu-action action-button',
             'data-action' => 'waitlist',
-            'data-id' => $record->id));
+            'data-id' => $record->id]);
 
             $action .= html_writer::link('javascript:void(0)',
             '<i class="icon fa fa-times fa-fw" aria-hidden="true"></i>'
             . get_string('reject', 'enrol_gapply'),
-            array('class' => 'dropdown-item menu-action action-button',
+            ['class' => 'dropdown-item menu-action action-button',
             'data-action' => 'reject',
-            'data-id' => $record->id));
+            'data-id' => $record->id]);
 
             $action .= html_writer::link('javascript:void(0)',
             '<i class="icon fa fa-trash fa-fw" aria-hidden="true"></i>'
             . get_string('delete', 'enrol_gapply'),
-            array('class' => 'dropdown-item menu-action action-button',
+            ['class' => 'dropdown-item menu-action action-button',
             'data-action' => 'delete',
-            'data-id' => $record->id));
+            'data-id' => $record->id]);
 
             $action .= html_writer::end_tag('ul');
             $action .= html_writer::end_tag('div');
 
-            $data = array(
+            $data = [
                 '',
                 $record->id,
                 $userpicture . '<a href="javascript:void(0)" class="showuserdetail font-weight-bold" data-status="'
@@ -310,7 +310,7 @@ if ($action == "approve") {
                 . $status . '\' data-id="' . $record->id
                 . '" data-userid="' . $record->userid . '">'
                 . $fullname . '</a>',
-            );
+            ];
 
             foreach ($showuseridentity as $field) {
                 if (strpos($field, 'profile_field_') !== false) {
@@ -320,15 +320,15 @@ if ($action == "approve") {
                     $data[] = format_string($record->user->{$field}, true);
                 }
             }
-            $data = array_merge($data, array(
+            $data = array_merge($data, [
                 $applicationdetails,
                 $applicationtext,
                 $attachments,
                 $status,
                 $date,
                 $record->timecreated,
-                $action
-            ));
+                $action,
+            ]);
             $table->data[] = $data;
         }
         echo json_encode($table->data);
