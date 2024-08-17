@@ -108,6 +108,11 @@ $tabs[] = new tabobject(
     "javascript:void(0);",
     get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
 );
+$tabs[] = new tabobject(
+    'seats',
+    "javascript:void(0);",
+    get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
+);
 // Edit instance.
 $tabs[] = new tabobject(
     'edit',
