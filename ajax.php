@@ -58,7 +58,7 @@ if ($action == "approve") {
     $message->text = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
     $message->contexturl = new moodle_url('/course/view.php', ['id' => $courseid]);
     $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
-
+    $currentlang = current_language();
     foreach ($records as $record) {
         $instance = $DB->get_record('enrol', ['id' => $id]);
         $enrol->enrol_user($instance, $record->userid, 5, $instance->enrolstartdate, $instance->enrolenddate);
@@ -71,8 +71,15 @@ if ($action == "approve") {
             }
         }
         $user = $DB->get_record('user', ['id' => $record->userid]);
+        if (get_config('enrol_gapply', 'sendnotificationinrecipientlang')) {
+            $SESSION->lang = $user->lang;
+            $message->subject = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+            $message->text = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+            $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
+        }
         $enrol->send_notification($user, $USER, $message);
     }
+    $SESSION->lang = $currentlang;
     // Update records from enrol_gapply where id in ids to status approved.
     [$insql, $inparams] = $DB->get_in_or_equal($ids);
     $DB->set_field_select('enrol_gapply', 'status', 'approved', "id $insql", $inparams);
@@ -91,10 +98,18 @@ if ($action == "approve") {
     $message->contexturl = new moodle_url('/course/view.php', ['id' => $courseid]);
     $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
     $records = $DB->get_records_list('enrol_gapply', 'id', $ids);
+    $currentlang = current_language();
     foreach ($records as $record) {
         $user = $DB->get_record('user', ['id' => $record->userid]);
+        if (get_config('enrol_gapply', 'sendnotificationinrecipientlang')) {
+            $SESSION->lang = $user->lang;
+            $message->subject = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+            $message->text = get_string('application' . $action, 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+            $message->contexturlname = get_string('viewcourse', 'enrol_gapply');
+        }
         $enrol->send_notification($user, $USER, $message);
     }
+    $SESSION->lang = $currentlang;
     die;
 } else if ($action == "delete") {
     $ids = required_param('ids', PARAM_TEXT);
@@ -153,8 +168,10 @@ if ($action == "approve") {
         }
         $identity[] = $item;
     }
-    echo $OUTPUT->render_from_template('enrol_gapply/profilesummary',
-    ['user' => $user, 'identity' => $identity, 'hasidentity' => true]);
+    echo $OUTPUT->render_from_template(
+        'enrol_gapply/profilesummary',
+        ['user' => $user, 'identity' => $identity, 'hasidentity' => true]
+    );
     die;
 } else if ($action == "getgroups") {
     $groups = groups_get_all_groups($courseid, 0, 0, 'g.id, g.name');
@@ -206,12 +223,14 @@ if ($action == "approve") {
                 foreach ($files as $file) {
                     $attachment = new stdClass;
                     $attachment->filename = $file->get_filename();
-                    $attachment->url = moodle_url::make_pluginfile_url($file->get_contextid(),
-                    $file->get_component(),
-                    $file->get_filearea(),
-                    $file->get_itemid(),
-                    $file->get_filepath(),
-                    $file->get_filename())->out();
+                    $attachment->url = moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename()
+                    )->out();
                     $attachment->mimetype = $file->get_mimetype();
                     array_push($attachments, $attachment);
                 }
@@ -234,18 +253,20 @@ if ($action == "approve") {
             $attachments = '';
             foreach ($record->attachments as $attachment) {
                 $attachments .= html_writer::link('javascript:void(0)', '<i class="fa fa-fw fa-paperclip mr-1"></i>'
-                . $attachment->filename, ['class' => 'small attachmentlink',
-                 'data-type' => $attachment->mimetype,
-                 'data-url' => $attachment->url,
-                 'data-userid' => $record->userid,
-                 'data-id' => $record->id])
-                . '<br>';
+                    . $attachment->filename, [
+                    'class' => 'small attachmentlink',
+                    'data-type' => $attachment->mimetype,
+                    'data-url' => $attachment->url,
+                    'data-userid' => $record->userid,
+                    'data-id' => $record->id
+                ])
+                    . '<br>';
             }
             $applicationdetails = '<div style="min-width: 500px; max-width: 100%">';
             if (!empty($record->applytext)) {
                 $applicationdetails .= '<div class="applicationtext overflow-auto mb-2" style="max-height: 200px" data-id="'
-                . $record->id . '">'
-                . $record->applytext . '</div>';
+                    . $record->id . '">'
+                    . $record->applytext . '</div>';
             }
             $applicationdetails .= '<div class="text-truncate">' . $attachments . '</div></div>';
             $type = "primary";
@@ -259,44 +280,64 @@ if ($action == "approve") {
             $action = '';
             // Render action menu.
             $action .= html_writer::start_tag('div', ['class' => 'dropdown']);
-            $action .= html_writer::start_tag('button',
-            ['class' => 'btn btn-icon d-flex align-items-center justify-content-center icon-no-margin ml-auto',
-            'type' => 'button',
-            'data-toggle' => 'dropdown',
-            'data-boundary' => 'window',
-            'aria-haspopup' => 'true',
-            'aria-expanded' => 'false']);
+            $action .= html_writer::start_tag(
+                'button',
+                [
+                    'class' => 'btn btn-icon d-flex align-items-center justify-content-center icon-no-margin ml-auto',
+                    'type' => 'button',
+                    'data-toggle' => 'dropdown',
+                    'data-boundary' => 'window',
+                    'aria-haspopup' => 'true',
+                    'aria-expanded' => 'false'
+                ]
+            );
             $action .= '<i class="icon fa fa-ellipsis-v fa-fw" title="Edit" role="img" aria-label="Edit"></i>';
             $action .= html_writer::end_tag('button');
             $action .= html_writer::start_tag('ul', ['class' => 'dropdown-menu menu dropdown-menu-right']);
 
-            $action .= html_writer::link('javascript:void(0)',
-            '<i class="icon fa fa-check fa-fw" aria-hidden="true"></i>'
-            . get_string('approve', 'enrol_gapply'),
-            ['class' => 'dropdown-item menu-action action-button',
-            'data-action' => 'approve',
-            'data-id' => $record->id]);
+            $action .= html_writer::link(
+                'javascript:void(0)',
+                '<i class="icon fa fa-check fa-fw" aria-hidden="true"></i>'
+                    . get_string('approve', 'enrol_gapply'),
+                [
+                    'class' => 'dropdown-item menu-action action-button',
+                    'data-action' => 'approve',
+                    'data-id' => $record->id
+                ]
+            );
 
-            $action .= html_writer::link('javascript:void(0)',
+            $action .= html_writer::link(
+                'javascript:void(0)',
                 '<i class="icon fa fa-clock-o fa-fw" aria-hidden="true"></i>'
-            . get_string('waitlist', 'enrol_gapply'),
-            ['class' => 'dropdown-item menu-action action-button',
-            'data-action' => 'waitlist',
-            'data-id' => $record->id]);
+                    . get_string('waitlist', 'enrol_gapply'),
+                [
+                    'class' => 'dropdown-item menu-action action-button',
+                    'data-action' => 'waitlist',
+                    'data-id' => $record->id
+                ]
+            );
 
-            $action .= html_writer::link('javascript:void(0)',
-            '<i class="icon fa fa-times fa-fw" aria-hidden="true"></i>'
-            . get_string('reject', 'enrol_gapply'),
-            ['class' => 'dropdown-item menu-action action-button',
-            'data-action' => 'reject',
-            'data-id' => $record->id]);
+            $action .= html_writer::link(
+                'javascript:void(0)',
+                '<i class="icon fa fa-times fa-fw" aria-hidden="true"></i>'
+                    . get_string('reject', 'enrol_gapply'),
+                [
+                    'class' => 'dropdown-item menu-action action-button',
+                    'data-action' => 'reject',
+                    'data-id' => $record->id
+                ]
+            );
 
-            $action .= html_writer::link('javascript:void(0)',
-            '<i class="icon fa fa-trash fa-fw" aria-hidden="true"></i>'
-            . get_string('delete', 'enrol_gapply'),
-            ['class' => 'dropdown-item menu-action action-button',
-            'data-action' => 'delete',
-            'data-id' => $record->id]);
+            $action .= html_writer::link(
+                'javascript:void(0)',
+                '<i class="icon fa fa-trash fa-fw" aria-hidden="true"></i>'
+                    . get_string('delete', 'enrol_gapply'),
+                [
+                    'class' => 'dropdown-item menu-action action-button',
+                    'data-action' => 'delete',
+                    'data-id' => $record->id
+                ]
+            );
 
             $action .= html_writer::end_tag('ul');
             $action .= html_writer::end_tag('div');
@@ -305,11 +346,11 @@ if ($action == "approve") {
                 '',
                 $record->id,
                 $userpicture . '<a href="javascript:void(0)" class="showuserdetail font-weight-bold" data-status="'
-                . $record->status
-                . '" data-statusformatted=\''
-                . $status . '\' data-id="' . $record->id
-                . '" data-userid="' . $record->userid . '">'
-                . $fullname . '</a>',
+                    . $record->status
+                    . '" data-statusformatted=\''
+                    . $status . '\' data-id="' . $record->id
+                    . '" data-userid="' . $record->userid . '">'
+                    . $fullname . '</a>',
             ];
 
             foreach ($showuseridentity as $field) {

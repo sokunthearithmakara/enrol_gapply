@@ -382,7 +382,7 @@ class enrol_gapply_plugin extends enrol_plugin {
      * @return string.
      */
     public function enrol_page_hook(stdClass $instance) {
-        global $CFG, $OUTPUT, $DB, $USER, $PAGE;
+        global $CFG, $OUTPUT, $DB, $USER, $PAGE, $SESSION;
 
         if (isguestuser()) {
             // Can not enrol guest!
@@ -666,9 +666,21 @@ class enrol_gapply_plugin extends enrol_plugin {
                 ]);
                 $message->contexturl = new moodle_url('/enrol/gapply/manage.php', ['id' => $instance->id]);
                 $message->contexturlname = get_string('manageapplications', 'enrol_gapply');
+                $currentlang = current_language();
                 foreach ($coursecontacts as $coursecontact) {
+                    $preferredlang = $coursecontact->lang;
+                    if (get_config('enrol_gapply', 'sendnotificationinrecipientlang')) {
+                        $SESSION->lang = $preferredlang;
+                        $message->subject = get_string('newapplicationfor', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+                        $message->text = get_string('newapplicationtext', 'enrol_gapply', [
+                            'coursefullname' => format_text($course->fullname, FORMAT_HTML),
+                            'username' => fullname($USER),
+                        ]);
+                        $message->contexturlname = get_string('manageapplications', 'enrol_gapply');
+                    }
                     $this->send_notification($coursecontact, $USER, $message);
                 }
+                $SESSION->lang = $currentlang;
             }
 
             redirect(new moodle_url('/enrol/index.php', ['id' => $instance->courseid]));

@@ -51,7 +51,6 @@ foreach ($profilefields as $field) {
 if ($hassiteconfig) {
     $settings = new admin_settingpage('enrol_gapply_settings', new lang_string('pluginname', 'enrol_gapply'));
 
-    // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
         // Set as default enrolment for new courses.
         $settings->add(new admin_setting_configcheckbox(
@@ -65,8 +64,16 @@ if ($hassiteconfig) {
             'enrol_gapply/showuseridentity',
             new lang_string('showuseridentity', 'enrol_gapply'),
             new lang_string('showuseridentity_desc', 'enrol_gapply'),
-            ['email' => 1],
+            ['department', 'idnumber', 'institution'],
             $fields
+        ));
+
+        // Send notification in recipient's preferred language.
+        $settings->add(new admin_setting_configcheckbox(
+            'enrol_gapply/sendnotificationinrecipientlang',
+            new lang_string('sendnotificationinrecipientlang', 'enrol_gapply'),
+            new lang_string('sendnotificationinrecipientlang_desc', 'enrol_gapply'),
+            0
         ));
     }
 }
