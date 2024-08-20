@@ -909,6 +909,9 @@ class enrol_gapply_plugin extends enrol_plugin {
         $fields['customtext3'] = [];
         $fields['customint1'] = 0;
         $fields['customint2'] = 0;
+        $defaultfiletypes = '.doc .docx .pdf web_image';
+        $fields['customtext2'] = $defaultfiletypes;
+        $fields['customint6'] = 1048576;
 
         return $fields;
     }
