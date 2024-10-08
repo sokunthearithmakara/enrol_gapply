@@ -752,7 +752,6 @@ class enrol_gapply_plugin extends enrol_plugin {
         $bulkoperations = [];
         if (has_capability("enrol/gapply:manage", $context)) {
             $bulkoperations['editselectedusers'] = new enrol_gapply_editselectedusers_operation($manager, $this);
-            // $bulkoperations['groupselectedusers'] = new enrol_gapply_groupselectedusers_operation($manager, $this);
         }
         if (has_capability("enrol/gapply:unenrol", $context)) {
             $bulkoperations['deleteselectedusers'] = new enrol_gapply_deleteselectedusers_operation($manager, $this);

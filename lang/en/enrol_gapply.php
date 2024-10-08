@@ -96,6 +96,7 @@ $string['gapply:config'] = 'Config enrol instances';
 $string['gapply:manage'] = 'Manage enrollment applications';
 $string['gapply:unenrol'] = 'Unenrol users from the course';
 $string['gapply:unenrolself'] = 'Unenrol self from the course';
+$string['groupselectedusers'] = 'Group selected users';
 $string['hidden'] = 'Hidden';
 $string['id'] = 'ID';
 $string['last'] = 'Last';
@@ -160,5 +161,4 @@ $string['withdrawapplicationconfirm'] = 'Are you sure you want to withdraw your 
 $string['withdrawmyapplication'] = 'Withdraw my application';
 $string['youhavebeenrejected'] = '<b>Your application has been rejected.</b><br>You will not be added to the course.';
 $string['youhavebeenwaitlisted'] = '<b>You have been waitlisted.</b><br>You will be added to the course when a place becomes available, in which case you will be notified.';
-$string['groupselectedusers'] = 'Group selected users';
 

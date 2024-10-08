@@ -22,10 +22,3 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace enrol_gapply\privacy;
-
-/**
- * Privacy Subsystem for enrol_gapply implementing null_provider.
- *
- * @package    enrol_gapply
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */

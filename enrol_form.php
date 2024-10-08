@@ -83,7 +83,8 @@ class enrol_gapply_form extends moodleform {
             $infohtml .= get_string('applicationends', 'enrol_gapply', userdate($instance->customint8));
         }
 
-        $infohtml .= '<div>' . get_string('availableseats', 'enrol_gapply') . ': <b>' . ($instance->customchar1 == 0 ? get_string('unlimitedseats', 'enrol_gapply') : $seat) . '</b></div>';
+        $infohtml .= '<div>' . get_string('availableseats', 'enrol_gapply') . ': <b>' . ($instance->customchar1 == 0 ? get_string('unlimitedseats', 'enrol_gapply') : $seat)
+            . '</b></div>';
 
         $infohtml .= '</div>';
 
