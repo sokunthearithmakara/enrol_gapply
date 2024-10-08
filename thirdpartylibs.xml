@@ -1,20 +1,6 @@
 <?xml version="1.0"?>
 <libraries>
     <library>
-        <location>libraries/Datatables</location>
-        <name>Datatables stylesheet</name>
-        <version>1.13.5</version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
-        <location>libraries/select2</location>
-        <name>Select2 Stylesheet</name>
-        <version>4.1.0-rc.0</version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
         <location>amd/src/buttons.bootstrap4.js</location>
         <name>Datatables Buttons Extension - Bootstrap 4</name>
         <version>2.4.1</version>
