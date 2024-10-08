@@ -67,12 +67,18 @@
 {{{applytext}}}
 {{#hasattachments}}
 {{#attachments}}
-<div class="text-truncate"><a class="attachmentlink" data-type="{{mimetype}}" data-url="{{url}}"
-        href="javascript:void(0)"><i class="fa fa-fw fa-paperclip mr-1"></i>{{filename}}</a></div>
+<div class="text-truncate">
+    <a class="attachmentlink" data-type="{{mimetype}}" data-url="{{url}}"
+    href="javascript:void(0)"><i class="fa fa-fw fa-paperclip mr-1"></i>{{filename}}</a>
+</div>
 {{/attachments}}
 {{/hasattachments}}
 </div>
 {{/hasapplication}}
+
+{{#allowwithdrawal}}
+<span role="button" class="btn btn-danger float-right mb-3" id="withdraw" data-instance="{{instance}}"><i class="fa fa-file-circle-minus fa-fw mr-2"></i>{{#str}}withdrawmyapplication, enrol_gapply{{/str}}</span>
+{{/allowwithdrawal}}
 
 {{#js}}
 require(['enrol_gapply/previewfile'], function(previewfile) {

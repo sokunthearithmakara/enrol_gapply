@@ -39,19 +39,21 @@ $context = context_course::instance($courseid);
 
 $PAGE->set_context($context);
 
-if (!has_capability('enrol/gapply:manage', $context)) {
+if (!has_capability('enrol/gapply:manage', $context) && $action !== 'withdraw') {
     die;
 }
 
 $enrol = enrol_get_plugin('gapply');
 
 if ($action == "approve") {
+    $roleid = required_param('roleid', PARAM_INT);
+    $start = required_param('start', PARAM_INT);
+    $end = required_param('end', PARAM_INT);
     $ids = required_param('ids', PARAM_TEXT);
     $ids = explode(',', $ids);
     $ids = array_map('intval', $ids); // Sanitize the input values
     // Get records from enrol_gapply where id in ids.
     $records = $DB->get_records_list('enrol_gapply', 'id', $ids);
-
     $message = new stdClass();
     $course = $DB->get_record('course', ['id' => $courseid]);
     $message->subject = get_string('applicationapproved', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
@@ -61,7 +63,7 @@ if ($action == "approve") {
     $currentlang = current_language();
     foreach ($records as $record) {
         $instance = $DB->get_record('enrol', ['id' => $id]);
-        $enrol->enrol_user($instance, $record->userid, 5, $instance->enrolstartdate, $instance->enrolenddate);
+        $enrol->enrol_user($instance, $record->userid, $roleid, $start, $end);
         // Add user to selected groups.
         $groups = optional_param('groups', '', PARAM_TEXT);
         if ($groups != '') {
@@ -83,6 +85,7 @@ if ($action == "approve") {
     // Update records from enrol_gapply where id in ids to status approved.
     [$insql, $inparams] = $DB->get_in_or_equal($ids);
     $DB->set_field_select('enrol_gapply', 'status', 'approved', "id $insql", $inparams);
+    echo 'success';
     die;
 } else if ($action == "waitlist" || $action == "reject") {
     $ids = required_param('ids', PARAM_TEXT);
@@ -110,12 +113,13 @@ if ($action == "approve") {
         $enrol->send_notification($user, $USER, $message);
     }
     $SESSION->lang = $currentlang;
+    echo 'success';
     die;
 } else if ($action == "delete") {
     $ids = required_param('ids', PARAM_TEXT);
     $ids = explode(',', $ids);
     // Get userid  from enrol_gapply where id in ids.
-    $ids = array_map('intval', $ids); // Sanitize the input values
+    $ids = array_map('intval', $ids); // Sanitize the input values.
     [$insql, $inparams] = $DB->get_in_or_equal($ids);
     $userid = $DB->get_fieldset_select('enrol_gapply', 'userid', "id $insql", $inparams);
     // Delete records from enrol_gapply where id in ids.
@@ -125,6 +129,13 @@ if ($action == "approve") {
     foreach ($userid as $uid) {
         $fs->delete_area_files($context->id, 'enrol_gapply', 'applyfile', $id . $uid);
     }
+    echo 'success';
+    die;
+} else if ($action == "withdraw") {
+    $DB->delete_records('enrol_gapply', ['instance' => $id, 'userid' => $USER->id]);
+    $fs = get_file_storage();
+    $fs->delete_area_files($context->id, 'enrol_gapply', 'applyfile', $id . $USER->id);
+    echo 'success';
     die;
 } else if ($action == "getuserbyid") {
     $userid = required_param('userid', PARAM_INT);
@@ -145,7 +156,9 @@ if ($action == "approve") {
             $corefields[] = $field;
         }
     }
-
+    // Get fields for userpicture.
+    $picfields = \core_user\fields::get_picture_fields();
+    $corefields = array_merge($corefields, $picfields);
     $corefield = implode(', ', $corefields);
     $user = $DB->get_record('user', ['id' => $userid], $corefield);
     if (!empty($customfields)) {
@@ -181,6 +194,15 @@ if ($action == "approve") {
         $groupsdata[] = ['id' => $group->id, 'name' => $group->name];
     }
     echo json_encode($groupsdata);
+    die;
+} else if ($action == "getrolesanddates") {
+    $roles = get_assignable_roles($context, ROLENAME_BOTH);
+    echo json_encode([
+        'roles' => $roles,
+        'defaultrole' => $instance->roleid,
+        'startdate' => $instance->enrolstartdate,
+        'enddate' => $instance->enrolenddate,
+    ]);
     die;
 } else if ($action == "getapplications") {
     require_sesskey();
@@ -258,7 +280,7 @@ if ($action == "approve") {
                     'data-type' => $attachment->mimetype,
                     'data-url' => $attachment->url,
                     'data-userid' => $record->userid,
-                    'data-id' => $record->id
+                    'data-id' => $record->id,
                 ])
                     . '<br>';
             }
@@ -288,7 +310,7 @@ if ($action == "approve") {
                     'data-toggle' => 'dropdown',
                     'data-boundary' => 'window',
                     'aria-haspopup' => 'true',
-                    'aria-expanded' => 'false'
+                    'aria-expanded' => 'false',
                 ]
             );
             $action .= '<i class="icon fa fa-ellipsis-v fa-fw" title="Edit" role="img" aria-label="Edit"></i>';
@@ -302,7 +324,7 @@ if ($action == "approve") {
                 [
                     'class' => 'dropdown-item menu-action action-button',
                     'data-action' => 'approve',
-                    'data-id' => $record->id
+                    'data-id' => $record->id,
                 ]
             );
 
@@ -313,7 +335,7 @@ if ($action == "approve") {
                 [
                     'class' => 'dropdown-item menu-action action-button',
                     'data-action' => 'waitlist',
-                    'data-id' => $record->id
+                    'data-id' => $record->id,
                 ]
             );
 
@@ -324,7 +346,7 @@ if ($action == "approve") {
                 [
                     'class' => 'dropdown-item menu-action action-button',
                     'data-action' => 'reject',
-                    'data-id' => $record->id
+                    'data-id' => $record->id,
                 ]
             );
 
@@ -335,7 +357,7 @@ if ($action == "approve") {
                 [
                     'class' => 'dropdown-item menu-action action-button',
                     'data-action' => 'delete',
-                    'data-id' => $record->id
+                    'data-id' => $record->id,
                 ]
             );
 

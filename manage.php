@@ -113,7 +113,12 @@ $tabs[] = new tabobject(
     'edit',
     new moodle_url(
         '/enrol/editinstance.php',
-        ['id' => $id, 'courseid' => $instance->courseid, "type" => 'gapply', 'returnurl' => '/enrol/gapply/manage.php?id=' . $id . '&tab=' . $tab]
+        [
+            'id' => $id,
+            'courseid' => $instance->courseid,
+            "type" => 'gapply',
+            'returnurl' => new moodle_url('/enrol/gapply/manage.php', ['id' => $id, 'tab' => $tab]),
+        ]
     ),
     '<i class="fa fa-cog mr-2"></i>' . get_string('edit', 'enrol_gapply'),
     get_string('edit', 'enrol_gapply')

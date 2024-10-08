@@ -75,5 +75,13 @@ if ($hassiteconfig) {
             new lang_string('sendnotificationinrecipientlang_desc', 'enrol_gapply'),
             0
         ));
+
+        if (!during_initial_install()) {
+            $options = get_default_enrol_roles(context_system::instance());
+            $student = get_archetype_roles('student');
+            $student = reset($student);
+            $settings->add(new admin_setting_configselect('enrol_gapply/roleid',
+                get_string('defaultrole', 'role'), '', $student->id ?? null, $options));
+        }
     }
 }

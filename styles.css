@@ -1,5 +1,6 @@
 #page-enrol-gapply-manage #page-content .nav-tabs .nav-item:nth-last-child(2) {
     margin-left: auto;
+    pointer-events: none;
 
     & a {
         color: #000;

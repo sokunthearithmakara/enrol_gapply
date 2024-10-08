@@ -155,6 +155,11 @@ class enrol_gapply_plugin extends enrol_plugin {
         global $PAGE, $CFG;
         $PAGE->add_body_class('limitedwidth');
 
+        // Make sure the roleid is set. Old version of the plugin has roleid = 0.
+        if ($instance != null && $instance->roleid == 0) {
+            $instance->roleid = get_config('enrol_gapply', 'roleid');
+        }
+
         // Do nothing by default.
         $mform->addElement('text', 'name', get_string('name', 'enrol_gapply'), ['size' => '100']);
         $mform->setType('name', PARAM_TEXT);
@@ -190,6 +195,8 @@ class enrol_gapply_plugin extends enrol_plugin {
         $mform->addElement('advcheckbox', 'customint4', get_string('showapplicationfile', 'enrol_gapply'), null, [0, 1]);
         $mform->hideIf('customint4', 'customint2', 'checked');
         $mform->addHelpButton('customint4', 'showapplicationfile', 'enrol_gapply');
+
+        $mform->addElement('advcheckbox', 'customchar3', get_string('allowwithdrawal', 'enrol_gapply'), null, [0, 1]);
 
         // Availibity header.
         $mform->addElement('header', 'availability', get_string('availability', 'enrol_gapply'));
@@ -304,6 +311,10 @@ class enrol_gapply_plugin extends enrol_plugin {
             ['optional' => true]
         );
         $mform->addHelpButton('enrolenddate', 'enrolenddate', 'enrol_gapply');
+
+        $roles = get_assignable_roles($context, ROLENAME_BOTH);
+        $mform->addElement('select', 'roleid', get_string('defaultrole', 'enrol_gapply'), $roles);
+        $mform->setDefault('roleid', get_config('enrol_gapply', 'roleid'));
     }
 
     /**
@@ -319,17 +330,6 @@ class enrol_gapply_plugin extends enrol_plugin {
     public function edit_instance_validation($data, $files, $instance, $context) {
         // No errors by default.
         return [];
-    }
-
-    /**
-     * Return whether or not, given the current state, it is possible to add a new instance
-     * of this enrolment plugin to the course.
-     *
-     * @param int $courseid Course ID.
-     * @return bool.
-     */
-    public function can_add_instance($courseid) {
-        return true;
     }
 
     /**
@@ -393,6 +393,7 @@ class enrol_gapply_plugin extends enrol_plugin {
         $record = $DB->get_record('enrol_gapply', ['instance' => $instance->id, 'userid' => $USER->id]);
         if ($record) {
             $recordcontext = [];
+            $recordcontext['instance'] = $instance->id;
             $timeapplied = userdate($record->timecreated);
             $recordcontext['time'] = $timeapplied;
 
@@ -468,6 +469,10 @@ class enrol_gapply_plugin extends enrol_plugin {
                 $recordcontext['hasapplication'] = true;
             }
 
+            if ($instance->customchar3 == 1 && $record->status == 'new') {
+                $recordcontext['allowwithdrawal'] = true;
+            }
+
             $output = $OUTPUT->render_from_template('enrol_gapply/applicationstatus', $recordcontext);
 
             // Add empty form to $output so that it looks like a form.
@@ -488,6 +493,11 @@ class enrol_gapply_plugin extends enrol_plugin {
                 'cannotopenpdffile',
                 'download',
                 'close',
+                'withdraw',
+                'withdrawapplication',
+                'withdrawapplicationconfirm',
+                'applicationwithdrawnsuccess',
+                'anerroroccurred',
             ], 'enrol_gapply');
 
             $return = html_writer::start_tag('div', ['class' => 'box py-3 generalbox']);
@@ -718,17 +728,31 @@ class enrol_gapply_plugin extends enrol_plugin {
     }
 
     /**
+     * Return whether or not, given the current state, it is possible to add a new instance
+     * of this enrolment plugin to the course.
+     *
+     * Default implementation is just for backwards compatibility.
+     *
+     * @param int $courseid
+     * @return boolean
+     */
+    public function can_add_instance($courseid) {
+        global $DB;
+        $instance = $DB->get_record('enrol', ['courseid' => $courseid, 'enrol' => 'gapply'], '*', IGNORE_MISSING);
+        return $instance ? false : true;
+    }
+
+    /**
      * The self enrollment plugin has several bulk operations that can be performed.
      * @param course_enrolment_manager $manager
      * @return array
      */
     public function get_bulk_operations(course_enrolment_manager $manager) {
-        global $CFG;
-        require_once($CFG->dirroot . '/enrol/self/locallib.php');
         $context = $manager->get_context();
         $bulkoperations = [];
         if (has_capability("enrol/gapply:manage", $context)) {
             $bulkoperations['editselectedusers'] = new enrol_gapply_editselectedusers_operation($manager, $this);
+            // $bulkoperations['groupselectedusers'] = new enrol_gapply_groupselectedusers_operation($manager, $this);
         }
         if (has_capability("enrol/gapply:unenrol", $context)) {
             $bulkoperations['deleteselectedusers'] = new enrol_gapply_deleteselectedusers_operation($manager, $this);
@@ -912,7 +936,7 @@ class enrol_gapply_plugin extends enrol_plugin {
         $defaultfiletypes = '.doc .docx .pdf web_image';
         $fields['customtext2'] = $defaultfiletypes;
         $fields['customint6'] = 1048576;
-
+        $fields['roleid'] = get_config('enrol_gapply', 'roleid');
         return $fields;
     }
 }
@@ -1002,20 +1026,5 @@ class enrol_gapply_emptyform extends moodleform {
         $mform->addElement('header', 'heading', format_text($heading, FORMAT_HTML));
 
         $mform->addElement('html', $output);
-    }
-}
-
-/**
- * Add loading div.
- */
-function enrol_gapply_before_footer() {
-    global $PAGE;
-    // Check page id; if equal to page-enrol-gapply-manage then add loading.
-    if ($PAGE->bodyid == 'page-enrol-gapply-manage') {
-        $loading = '<div id="enrol-gapply-loading" class="d-none align-items-center justify-content-center position-fixed w-100 h-100"
-    style="top: 0;bottom: 0; left: 0; right: 0; z-index: 9999; background: rgba(0,0,0,0.5);">
-    <div class="spinner-grow text-light" style="width: 3rem; height: 3rem;" role="status">
-    <span class="sr-only">Loading...</span></div></div>';
-        echo $loading;
     }
 }

@@ -52,14 +52,13 @@ class enrol_gapply_form extends moodleform {
      * Form definition
      */
     public function definition() {
-        global $USER, $PAGE;
-
-        $context = context_system::instance();
-        $PAGE->set_context($context);
-
+        global $USER, $PAGE, $CFG;
         $mform = $this->_form;
         $instance = $this->_customdata["instance"];
-
+        if ($CFG->version < 2024100700) {
+            $context = context_system::instance();
+            $PAGE->set_context($context);
+        }
         $this->instance = $instance;
         $plugin = enrol_get_plugin('gapply');
 
