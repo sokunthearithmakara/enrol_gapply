@@ -231,6 +231,9 @@ if ($action == "approve") {
             }
         }
 
+        // Get fields for userpicture.
+        $picfields = \core_user\fields::get_picture_fields();
+        $corefields = array_merge($corefields, $picfields);
         $corefield = implode(', ', $corefields);
 
         $fs = get_file_storage();
