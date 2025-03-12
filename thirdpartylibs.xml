@@ -84,6 +84,18 @@
         <license>MIT</license>
         <licenseversion></licenseversion>
     </library>
-
-
+    <library>
+        <location>libraries/Datatables</location>
+        <name>Datatables Library</name>
+        <version>1.13.5</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>libraries/select2</location>
+        <name>Select2 Library</name>
+        <version>4.1.0-rc.0</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
 </libraries>

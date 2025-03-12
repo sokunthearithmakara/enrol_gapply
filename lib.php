@@ -678,10 +678,17 @@ class enrol_gapply_plugin extends enrol_plugin {
                 $message->contexturlname = get_string('manageapplications', 'enrol_gapply');
                 $currentlang = current_language();
                 foreach ($coursecontacts as $coursecontact) {
+                    if (!is_enrolled($filecontext, $coursecontact->id)) {
+                        continue;
+                    }
                     $preferredlang = $coursecontact->lang;
                     if (get_config('enrol_gapply', 'sendnotificationinrecipientlang')) {
                         $SESSION->lang = $preferredlang;
-                        $message->subject = get_string('newapplicationfor', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
+                        $message->subject = get_string(
+                            'newapplicationfor',
+                            'enrol_gapply',
+                            format_text($course->fullname, FORMAT_HTML)
+                        );
                         $message->text = get_string('newapplicationtext', 'enrol_gapply', [
                             'coursefullname' => format_text($course->fullname, FORMAT_HTML),
                             'username' => fullname($USER),
@@ -763,10 +770,10 @@ class enrol_gapply_plugin extends enrol_plugin {
      * Add a new instance of this enrolment plugin to the course.
      *
      * @param stdClass $course Course.
-     * @param array $fields Form data.
+     * @param ?array $fields Form data.
      * @return int The id of the new instance.
      */
-    public function add_instance($course, array $fields = null) {
+    public function add_instance($course, ?array $fields = null) {
         // In the form we are representing 2 db columns with one field.
         if (!empty($fields) && !empty($fields['expirynotify'])) {
             if ($fields['expirynotify'] == 2) {
