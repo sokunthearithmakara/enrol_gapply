@@ -10,8 +10,8 @@ export const init = () => {
                         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="applyfileLabel"></h5>
-                                    <button   class="close" data-dismiss="modal" aria-label="Close">
+                                    <h5 class="modal-title flex-grow-1" id="applyfileLabel"></h5>
+                                    <button class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                                     <i class="fa fa-times" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -22,7 +22,8 @@ export const init = () => {
                                         class="btn btn-primary text-uppercase font-weight-bold">
                                         ${M.util.get_string("download", "enrol_gapply")}</a>
                                     <button class="btn btn-secondary text-uppercase font-weight-bold"
-                                        data-dismiss="modal">${M.util.get_string("close", "enrol_gapply")}</button>
+                                        data-dismiss="modal" data-bs-dismiss="modal">
+                                        ${M.util.get_string("close", "enrol_gapply")}</button>
                                 </div>
                             </div>
                         </div>

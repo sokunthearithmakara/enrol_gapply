@@ -1,13 +1,17 @@
 #page-enrol-gapply-manage #page-content .nav-tabs .nav-item:nth-last-child(2) {
     margin-left: auto;
     pointer-events: none;
+}
 
-    & a {
-        color: #000;
-    }
+#page-enrol-gapply-manage #page-content .nav-tabs .nav-item:nth-last-child(2) & a {
+    color: #000;
 }
 
 #page-enrol-gapply-manage table.dataTable > tbody > tr.selected > td.select-checkbox:after,
 table.dataTable > tbody > tr.selected > th.select-checkbox:after {
     margin-top: -16px;
+}
+
+#page-enrol-gapply-manage .btn.action-button {
+    color: #fff;
 }

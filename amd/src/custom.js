@@ -51,8 +51,8 @@ define(
                             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="applyfileLabel"></h5>
-                                        <button class="close" data-dismiss="modal" aria-label="Close">
+                                        <h5 class="modal-title flex-grow-1" id="applyfileLabel"></h5>
+                                        <button class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                                         <i class="fa fa-times" aria-hidden="true"></i>
                                         </button>
                                     </div>
@@ -63,7 +63,8 @@ define(
                                             class="btn btn-primary text-uppercase font-weight-bold">
                                             ${M.util.get_string("download", "enrol_gapply")}</a>
                                         <button class="btn btn-secondary text-uppercase font-weight-bold"
-                                            data-dismiss="modal">${M.util.get_string("close", "enrol_gapply")}</button>
+                                            data-dismiss="modal" data-bs-dismiss="modal">
+                                            ${M.util.get_string("close", "enrol_gapply")}</button>
                                     </div>
                                 </div>
                             </div>
@@ -231,7 +232,7 @@ define(
                         $('#gapplytable').removeClass('d-none');
                         $(".dataTables_filter").addClass("d-flex align-items-start float-right");
                         $(`<a class="btn btn-sm btn-secondary font-weight-bold ml-1"
-                             href="javascript:void(0)" id="filters" data-toggle="tooltip"
+                             href="javascript:void(0)" id="filters" data-toggle="tooltip" data-bs-toggle="tooltip"
                              title="Filter"><i class="fa fa-filter left fa-fw"></i></a>`).insertAfter(".dataTables_filter label");
                         $(document).off('click', '#filters').on('click', '#filters', function() {
                             $('#filterregion').slideToggle('fast', 'swing');
@@ -243,10 +244,12 @@ define(
                         // Create sort dropdown
                         $(`<div class="dropdown d-inline right small">
                     <button class="btn btn-sm btn-secondary dropdown-toggle font-weight-bold ml-1"
-                     id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                     id="dropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
                      <i class="fa fa-sort fa-fw"></i>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-right" id="sortdropdown" aria-labelledby="dropdownMenuButton">
+                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-end" id="sortdropdown"
+                    aria-labelledby="dropdownMenuButton">
                     </div></div>`).insertAfter("#filters");
                         profileFields.forEach((element) => {
                             $('#sortdropdown').append(`<a class="dropdown-item" href="javascript:void(0)"
@@ -310,13 +313,17 @@ define(
                     selecteddata = table.rows({selected: true}).data().toArray().map(row => row[1]);
                     if (selecteddata.length > 0) {
                         $("#gapplytable_length label").after(`
-                            <button class="btn btn-sm alert-success action-button" data-action="approve" data-toggle="tooltip"
+                            <button class="btn btn-sm btn-success action-button" data-action="approve" data-toggle="tooltip"
+                             data-bs-toggle="tooltip"
                              title="${M.util.get_string("approve", "enrol_gapply")}"><i class="fa fa-fw fa-check"></i></button>
-                            <button class="btn btn-sm alert-info action-button" data-action="waitlist" data-toggle="tooltip"
+                            <button class="btn btn-sm btn-info action-button" data-action="waitlist" data-toggle="tooltip"
+                             data-bs-toggle="tooltip"
                              title="${M.util.get_string("waitlist", "enrol_gapply")}"><i class="fa fa-fw fa-clock-o"></i></button>
-                            <button class="btn btn-sm alert-warning action-button" data-action="reject" data-toggle="tooltip"
+                            <button class="btn btn-sm btn-warning action-button" data-action="reject" data-toggle="tooltip"
+                             data-bs-toggle="tooltip"
                              title="${M.util.get_string("reject", "enrol_gapply")}"><i class="fa fa-fw fa-times"></i></button>
-                            <button class="btn btn-sm alert-danger action-button" data-action="delete" data-toggle="tooltip"
+                            <button class="btn btn-sm btn-danger action-button" data-action="delete" data-toggle="tooltip"
+                             data-bs-toggle="tooltip"
                              title="${M.util.get_string("delete", "enrol_gapply")}"><i class="fa fa-fw fa-trash"></i></button>`
                         );
                     } else {
@@ -440,9 +447,10 @@ define(
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="approveModalLabel">
+                                                <h5 class="modal-title flex-grow-1" id="approveModalLabel">
                                                 ${M.util.get_string(action + 'applications', 'enrol_gapply')}</h5>
-                                                <button class="close" data-dismiss="modal" aria-label="Close">
+                                                <button class="close" data-dismiss="modal" data-bs-dismiss="modal"
+                                                 aria-label="Close">
                                                 <i class="fa fa-fw fa-times"></i>
                                                 </button>
                                                 </div>
@@ -455,7 +463,8 @@ define(
                                             </div>
                                             <div class="modal-footer">
                                                 <button class="btn btn-secondary text-uppercase font-weight-bold"
-                                                 data-dismiss="modal">${M.util.get_string('cancel', 'enrol_gapply')}</button>
+                                                 data-dismiss="modal" data-bs-dismiss="modal">
+                                                 ${M.util.get_string('cancel', 'enrol_gapply')}</button>
                                                 <button class="btn ${primarybutton} text-uppercase font-weight-bold"
                                                  id="proceed">${M.util.get_string('proceed', 'enrol_gapply')}</button>
                                             </div>

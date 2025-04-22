@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.11] - 2025-04-22
+- Support for Moodle 5.0
+
 ## [1.0.9] - 2024-10-08
 
 ### Added

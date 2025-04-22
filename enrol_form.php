@@ -23,7 +23,6 @@
  */
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/enrol/gapply/lib.php');
-require_once($CFG->dirroot . '/lib/editor/atto/lib.php');
 require_once($CFG->libdir . '/formslib.php');
 
 /**

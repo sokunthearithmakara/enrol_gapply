@@ -311,6 +311,8 @@ if ($action == "approve") {
                     'class' => 'btn btn-icon d-flex align-items-center justify-content-center icon-no-margin ml-auto',
                     'type' => 'button',
                     'data-toggle' => 'dropdown',
+                    'data-bs-toggle' => 'dropdown',
+                    'data-bs-boundary' => 'window',
                     'data-boundary' => 'window',
                     'aria-haspopup' => 'true',
                     'aria-expanded' => 'false',
@@ -318,7 +320,7 @@ if ($action == "approve") {
             );
             $action .= '<i class="icon fa fa-ellipsis-v fa-fw" title="Edit" role="img" aria-label="Edit"></i>';
             $action .= html_writer::end_tag('button');
-            $action .= html_writer::start_tag('ul', ['class' => 'dropdown-menu menu dropdown-menu-right']);
+            $action .= html_writer::start_tag('ul', ['class' => 'dropdown-menu menu dropdown-menu-right dropdown-menu-end']);
 
             $action .= html_writer::link(
                 'javascript:void(0)',
