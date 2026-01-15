@@ -118,6 +118,9 @@ $string['noapplications'] = 'No applications to process';
 $string['nofound'] = 'Not found';
 $string['notavailableanymore'] = 'Application deadline was {$a}. We are no longer accepting applications.';
 $string['notavailableyet'] = 'Application start date is <b>{$a}</b>. Check back later.';
+$string['notifications'] = 'Notifications';
+$string['notifyusers'] = 'Notify users';
+$string['notifyusers_help'] = 'Select the users that will be notified when an application is submitted. If not selected, notifications will be sent to the course contact roles.';
 $string['participants'] = 'Participants';
 $string['pluginname'] = 'Enrollment application';
 $string['previous'] = 'Previous';
@@ -161,8 +164,3 @@ $string['withdrawapplicationconfirm'] = 'Are you sure you want to withdraw your 
 $string['withdrawmyapplication'] = 'Withdraw my application';
 $string['youhavebeenrejected'] = '<b>Your application has been rejected.</b><br>You will not be added to the course.';
 $string['youhavebeenwaitlisted'] = '<b>You have been waitlisted.</b><br>You will be added to the course when a place becomes available, in which case you will be notified.';
-$string['notifications'] = 'Notifications';
-$string['notifyusers'] = 'Notify users';
-$string['notifyusers_help'] = 'Select the users that will be notified when an application is submitted. If not selected, notifications will be sent to the course contact roles.';
-
-

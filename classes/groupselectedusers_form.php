@@ -34,7 +34,6 @@ require_once("$CFG->dirroot/enrol/bulkchange_forms.php");
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_gapply_groupselectedusers_form extends moodleform {
-
     /**
      * Defines the standard structure of the form
      */

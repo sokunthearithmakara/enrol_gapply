@@ -243,10 +243,9 @@ if ($action == "approve") {
             $attachments = [];
 
             if ($files = $fs->get_area_files($context->id, 'enrol_gapply', 'applyfile', $id . $record->userid, 'filename', false)) {
-
                 // Look through each file being managed.
                 foreach ($files as $file) {
-                    $attachment = new stdClass;
+                    $attachment = new stdClass();
                     $attachment->filename = $file->get_filename();
                     $attachment->url = moodle_url::make_pluginfile_url(
                         $file->get_contextid(),

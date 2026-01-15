@@ -30,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  * Class enrol_gapply_plugin.
  */
 class enrol_gapply_plugin extends enrol_plugin {
-
     /**
      * Return an array of action icons for the instance.
      *
@@ -432,7 +431,6 @@ class enrol_gapply_plugin extends enrol_plugin {
             } else if ($record->status == 'rejected') {
                 $recordcontext['rejected'] = true;
             } else if ($record->status == 'approved') {
-
                 $enrolment = $DB->get_record('user_enrolments', ['enrolid' => $instance->id, 'userid' => $USER->id]);
 
                 if ($enrolment) {
@@ -459,14 +457,16 @@ class enrol_gapply_plugin extends enrol_plugin {
 
             $coursecontext = context_course::instance($instance->courseid);
 
-            if ($files = $fs->get_area_files(
-                $coursecontext->id,
-                'enrol_gapply',
-                'applyfile',
-                $instance->id . $record->userid,
-                'filename',
-                false
-            )) {
+            if (
+                $files = $fs->get_area_files(
+                    $coursecontext->id,
+                    'enrol_gapply',
+                    'applyfile',
+                    $instance->id . $record->userid,
+                    'filename',
+                    false
+                )
+            ) {
                 // Look through each file being managed.
                 foreach ($files as $file) {
                     $downloadurl = moodle_url::make_pluginfile_url(
@@ -477,7 +477,7 @@ class enrol_gapply_plugin extends enrol_plugin {
                         $file->get_filepath(),
                         $file->get_filename()
                     )->out();
-                    $attachment = new stdClass;
+                    $attachment = new stdClass();
                     $attachment->filename = $file->get_filename();
                     $attachment->url = $downloadurl;
                     $attachment->mimetype = $file->get_mimetype();
@@ -504,7 +504,8 @@ class enrol_gapply_plugin extends enrol_plugin {
             $output = $OUTPUT->render_from_template('enrol_gapply/applicationstatus', $recordcontext);
 
             // Add empty form to $output so that it looks like a form.
-            $form = new enrol_gapply_emptyform(
+            $formclass = 'enrol_gapply\form\defaultform';
+            $form = new $formclass(
                 null,
                 [
                     'instance' => $instance,
@@ -689,7 +690,7 @@ class enrol_gapply_plugin extends enrol_plugin {
                 $coursecontacts = array_filter($coursecontacts, function ($contact) use ($filecontext) {
                     return is_enrolled($filecontext, $contact, 'enrol/gapply:manage');
                 });
-                list($insql, $inparams) = $DB->get_in_or_equal($coursecontacts, SQL_PARAMS_NAMED, 'id');
+                [$insql, $inparams] = $DB->get_in_or_equal($coursecontacts, SQL_PARAMS_NAMED, 'id');
                 $coursecontacts = $DB->get_records_sql("
                     SELECT u.*
                       FROM {user} u
@@ -861,14 +862,16 @@ class enrol_gapply_plugin extends enrol_plugin {
         }
 
         // Remove all users groups linked to this enrolment instance.
-        if ($gms = $DB->get_records(
-            'groups_members',
-            [
-                'userid' => $userid,
-                'component' => 'enrol_' . $name,
-                'itemid' => $instance->id,
-            ]
-        )) {
+        if (
+            $gms = $DB->get_records(
+                'groups_members',
+                [
+                    'userid' => $userid,
+                    'component' => 'enrol_' . $name,
+                    'itemid' => $instance->id,
+                ]
+            )
+        ) {
             foreach ($gms as $gm) {
                 groups_remove_member($gm->groupid, $gm->userid);
             }
@@ -1042,29 +1045,4 @@ function enrol_gapply_extend_navigation_course(\navigation_node $navigation, \st
         null,
         new pix_icon('i/report', '')
     );
-}
-
-require_once($CFG->libdir . '/formslib.php');
-/**
- * Form for adding a new instance of the gapply enrolment plugin.
- */
-class enrol_gapply_emptyform extends moodleform {
-    /**
-     * Add elements to form.
-     * @return void
-     */
-    public function definition() {
-        $mform = $this->_form;
-        $output = $this->_customdata['output'];
-        $instance = $this->_customdata['instance'];
-        $plugin = enrol_get_plugin('gapply');
-        $heading = $plugin->get_instance_name($instance);
-        if ($instance->name != null) {
-            $heading = $instance->name;
-        }
-
-        $mform->addElement('header', 'heading', format_text($heading, FORMAT_HTML));
-
-        $mform->addElement('html', $output);
-    }
 }

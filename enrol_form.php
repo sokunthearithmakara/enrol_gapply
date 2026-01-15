@@ -29,7 +29,6 @@ require_once($CFG->libdir . '/formslib.php');
  * Form to enrol a user in a course
  */
 class enrol_gapply_form extends moodleform {
-
     /**
      * instance of enrol plugin
      *
