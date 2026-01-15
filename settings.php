@@ -49,7 +49,7 @@ foreach ($profilefields as $field) {
 }
 
 if ($hassiteconfig) {
-    $settings = new admin_settingpage('enrol_gapply_settings', new lang_string('pluginname', 'enrol_gapply'));
+    $settings = new admin_settingpage('enrolsettingsgapply', new lang_string('pluginname', 'enrol_gapply'));
 
     if ($ADMIN->fulltree) {
         // Set as default enrolment for new courses.
@@ -80,8 +80,13 @@ if ($hassiteconfig) {
             $options = get_default_enrol_roles(context_system::instance());
             $student = get_archetype_roles('student');
             $student = reset($student);
-            $settings->add(new admin_setting_configselect('enrol_gapply/roleid',
-                get_string('defaultrole', 'role'), '', $student->id ?? null, $options));
+            $settings->add(new admin_setting_configselect(
+                'enrol_gapply/roleid',
+                get_string('defaultrole', 'role'),
+                '',
+                $student->id ?? null,
+                $options
+            ));
         }
     }
 }

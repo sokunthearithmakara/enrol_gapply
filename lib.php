@@ -315,6 +315,34 @@ class enrol_gapply_plugin extends enrol_plugin {
         $roles = get_assignable_roles($context, ROLENAME_BOTH);
         $mform->addElement('select', 'roleid', get_string('defaultrole', 'enrol_gapply'), $roles);
         $mform->setDefault('roleid', get_config('enrol_gapply', 'roleid'));
+
+        // Notification header.
+        $mform->addElement('header', 'notificationheader', get_string('notifications', 'enrol_gapply'));
+        $mform->setExpanded('notificationheader', true);
+
+        $users = get_enrolled_users(
+            $context,
+            'enrol/gapply:manage',
+            0,
+            'u.*',
+            'u.lastname ASC',
+            0,
+            0,
+            true
+        );
+
+        $formattedusers = [];
+        foreach ($users as $id => $user) {
+            $formattedusers[$id] = fullname($user);
+        }
+        $mform->addElement(
+            'select',
+            'customtext4',
+            get_string('notifyusers', 'enrol_gapply'),
+            $formattedusers,
+            ['multiple' => 'multiple']
+        );
+        $mform->addHelpButton('customtext4', 'notifyusers', 'enrol_gapply');
     }
 
     /**
@@ -654,21 +682,27 @@ class enrol_gapply_plugin extends enrol_plugin {
             }
 
             // Notify course contact (teachers) that a new application has been submitted.
-            $coursecontacts = get_users_by_capability(
-                $filecontext,
-                'enrol/gapply:manage',
-                '',
-                'u.lastname ASC, u.firstname ASC',
-                '',
-                '',
-                '',
-                '',
-                false,
-                false
-            );
+            $course = get_course($instance->courseid);
+            if (!empty($instance->customtext4)) {
+                $coursecontacts = explode(',', $instance->customtext4);
+                // What if the contact is no longer enrolled in the course?
+                $coursecontacts = array_filter($coursecontacts, function ($contact) use ($filecontext) {
+                    return is_enrolled($filecontext, $contact, 'enrol/gapply:manage');
+                });
+                list($insql, $inparams) = $DB->get_in_or_equal($coursecontacts, SQL_PARAMS_NAMED, 'id');
+                $coursecontacts = $DB->get_records_sql("
+                    SELECT u.*
+                      FROM {user} u
+                     WHERE u.id $insql", $inparams);
+            } else {
+                $coursecontact = [];
+                $courseelement = new core_course_list_element($course);
+                if ($courseelement->has_course_contacts()) {
+                    $coursecontact = $courseelement->get_course_contacts();
+                }
+            }
             if ($coursecontacts) {
                 $message = new stdClass();
-                $course = $DB->get_record('course', ['id' => $instance->courseid]);
                 $message->subject = get_string('newapplicationfor', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
                 $message->text = get_string('newapplicationtext', 'enrol_gapply', [
                     'coursefullname' => format_text($course->fullname, FORMAT_HTML),
@@ -678,9 +712,6 @@ class enrol_gapply_plugin extends enrol_plugin {
                 $message->contexturlname = get_string('manageapplications', 'enrol_gapply');
                 $currentlang = current_language();
                 foreach ($coursecontacts as $coursecontact) {
-                    if (!is_enrolled($filecontext, $coursecontact->id)) {
-                        continue;
-                    }
                     $preferredlang = $coursecontact->lang;
                     if (get_config('enrol_gapply', 'sendnotificationinrecipientlang')) {
                         $SESSION->lang = $preferredlang;
@@ -785,7 +816,8 @@ class enrol_gapply_plugin extends enrol_plugin {
         }
 
         $fields['customtext1'] = $fields['customtext1'] ? $fields['customtext1']['text'] : '';
-        $fields['customtext3'] = implode(',', $fields['customtext3']);
+        $fields['customtext3'] = $fields['customtext3'] ? implode(',', $fields['customtext3']) : '';
+        $fields['customtext4'] = $fields['customtext4'] ? implode(',', $fields['customtext4']) : '';
         return parent::add_instance($course, $fields);
     }
 
@@ -799,6 +831,7 @@ class enrol_gapply_plugin extends enrol_plugin {
     public function update_instance($instance, $data) {
         $data->customtext1 = $data->customtext1['text'];
         $data->customtext3 = implode(',', $data->customtext3);
+        $data->customtext4 = implode(',', $data->customtext4);
         return parent::update_instance($instance, $data);
     }
 
@@ -941,6 +974,7 @@ class enrol_gapply_plugin extends enrol_plugin {
         $fields['customint2'] = 0;
         $defaultfiletypes = '.doc .docx .pdf web_image';
         $fields['customtext2'] = $defaultfiletypes;
+        $fields['customtext4'] = '';
         $fields['customint6'] = 1048576;
         $fields['roleid'] = get_config('enrol_gapply', 'roleid');
         return $fields;

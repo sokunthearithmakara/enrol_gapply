@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'enrol_gapply';
-$plugin->release = '1.0.11';
-$plugin->version = 2025042200;
+$plugin->release = '1.0.12';
+$plugin->version = 2026011500;
 $plugin->requires = 2022112800;
-$plugin->supported = [401, 500];
+$plugin->supported = [401, 501];
 $plugin->maturity = MATURITY_STABLE;
