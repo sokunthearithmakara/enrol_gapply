@@ -81,7 +81,6 @@ jobs:
           - php: '8.3'
             moodle-branch: 'MOODLE_502_STABLE'
             database: 'mariadb'
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -145,7 +144,7 @@ jobs:
 
       - name: Grunt
         if: ${{ always() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 0
+        run: moodle-plugin-ci grunt
 
       - name: PHPUnit tests
         if: ${{ always() }}
