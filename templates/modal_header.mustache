@@ -1,8 +1,33 @@
+{{!
+    @template enrol_gapply/modal_header
+
+    Header for the application detail modal.
+
+    Example context (json):
+    {
+        "user": {
+            "picture": "<img src='...'>",
+            "fullname": "John Doe",
+            "appliedon": "2026-05-07"
+        },
+        "applicationid": 123,
+        "statushtml": "<span class='badge badge-info'>New</span>",
+        "isapproved": false,
+        "iswaitlisted": false,
+        "isrejected": false,
+        "previd": 122,
+        "nextid": 124,
+        "index": 1,
+        "total": 10
+    }
+}}
 <div class="modal-title w-100 d-flex align-items-center justify-content-between">
     <div class="user-info d-flex align-items-center">
         {{{user.picture}}}
         <div class="names-container mx-2">
+            {{#user.fullname}}
             <h5 class="names font-weight-bold mb-0">{{user.fullname}}</h5>
+            {{/user.fullname}}
             <div class="text-muted d-flex align-items-center">
                 <small class="me-1 mr-1">#{{applicationid}}</small>|
                 <small class="mx-1"><i class="fa fa-clock-o mr-1 me-1"></i> {{user.appliedon}}</small>|

@@ -1,3 +1,18 @@
+{{!
+    @template enrol_gapply/applicationstatus
+
+    Status of a user's application.
+
+    Example context (json):
+    {
+        "id": 123,
+        "new": true,
+        "time": "2026-05-07",
+        "hasapplication": true,
+        "applytext": "I want to join because...",
+        "moodlebranch": 500
+    }
+}}
 {{#id}}<span>{{#str}}applicationid, enrol_gapply{{/str}}: {{id}}</span>{{/id}}
 {{#noenrolment}}
     <div class="alert alert-danger mt-3">

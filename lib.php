@@ -25,7 +25,6 @@
 // The base class 'enrol_plugin' can be found at lib/enrollib.php. Override
 // methods as necessary.
 
-defined('MOODLE_INTERNAL') || die();
 /**
  * Class enrol_gapply_plugin.
  */

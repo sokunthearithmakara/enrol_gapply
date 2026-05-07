@@ -14,6 +14,9 @@ All notable changes to this project will be documented in this file.
 - Migration to `core/modal`: The custom modal logic has been replaced with native Moodle Modals for better accessibility and theme compatibility.
 - Dual-Pane Detail View: New Mustache templates (`modal_body.mustache`, `modal_header.mustache`) implement a side-by-side layout for simultaneous document preview and application data management.
 - Record Navigation: Added "Next" and "Previous" buttons within the modal, allowing admins to cycle through applications without closing and reopening the view.
+- Custom messages for approval/rejection/waitlist and withdrawal.
+- Search and launch application by application ID (aid).
+- Notification now links to the specific application.
 
 ### 👥 Participants Page Integration
 
@@ -27,7 +30,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📈 Versioning & Compatibility
 
-- Moodle 5.2 Support: Updated compatibility to support Moodle 5.02 (`$plugin->supported = [401, 502]`).
+- Moodle 5.2 Support: Updated compatibility to support Moodle 5.2 (`$plugin->supported = [401, 502]`).
 
 ### 🚀 Optimized Performance
 

@@ -1,4 +1,20 @@
 
+{{!
+    @template enrol_gapply/profilesummary
+
+    Legacy profile summary view.
+
+    Example context (json):
+    {
+        "hasidentity": true,
+        "identity": [{"name": "Phone", "value": "123456"}],
+        "user": {
+            "picture": "<img src='...'>",
+            "fullname": "John Doe",
+            "lastaccess": "2 mins ago"
+        }
+    }
+}}
 <div class="card mb-0">
     <div class="card-header d-flex align-items-center p-0">
         <div class="col-8 py-2" style="height: 120px; overflow: auto;">
@@ -16,9 +32,7 @@
         <div class="col-4 d-flex align-items-center">
             {{{user.picture}}}
             <div class="ml-2">
-                <h3 class="card-title mb-1 d-inline mr-1">
-                <span>{{{user.fullname}}}</span>
-                </h3>
+                <h3 class="card-title mb-1 d-inline mr-1"><span>{{#user.fullname}}{{{user.fullname}}}{{/user.fullname}}{{^user.fullname}}-{{/user.fullname}}</span></h3>
                 <span id="currentstatus"></span>
                 <div class="d-flex flex-column">
                     <div class="small text-muted">{{#str}}lastaccess, enrol_gapply{{/str}}{{{user.lastaccess}}}</div>

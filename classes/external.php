@@ -54,9 +54,9 @@ class external extends external_api {
             'action' => new external_value(PARAM_ALPHA, 'Action to perform: approve, waitlist, reject, delete, withdraw'),
             'ids' => new external_multiple_structure(new external_value(PARAM_INT, 'Application IDs')),
             'instanceid' => new external_value(PARAM_INT, 'Enrol instance ID'),
-            'roleid' => new external_value(PARAM_INT, 'Role ID for approval', VALUE_DEFAULT, 0),
-            'start' => new external_value(PARAM_INT, 'Start time for approval', VALUE_DEFAULT, 0),
-            'end' => new external_value(PARAM_INT, 'End time for approval', VALUE_DEFAULT, 0),
+            'roleid' => new external_value(PARAM_INT, 'Role ID for enrolment', VALUE_DEFAULT, 0),
+            'start' => new external_value(PARAM_INT, 'Start time for enrolment', VALUE_DEFAULT, 0),
+            'end' => new external_value(PARAM_INT, 'End time for enrolment', VALUE_DEFAULT, 0),
             'groups' => new external_multiple_structure(new external_value(PARAM_INT, 'Group IDs'), 'Group IDs', VALUE_DEFAULT, []),
             'reason' => new external_value(PARAM_RAW, 'Reason for withdrawal', VALUE_DEFAULT, ''),
             'message' => new external_value(PARAM_RAW, 'Outcome message', VALUE_DEFAULT, ''),
@@ -65,6 +65,16 @@ class external extends external_api {
 
     /**
      * Manage applications (approve, reject, etc).
+     * @param string $action Action to perform: approve, waitlist, reject, delete, withdraw
+     * @param array $ids Array of application IDs to manage
+     * @param int $instanceid Enrol instance ID
+     * @param int $roleid Role ID for enrolment
+     * @param int $start Start time for enrolment
+     * @param int $end End time for enrolment
+     * @param array $groups Array of group IDs to add users to
+     * @param string $reason Reason for withdrawal
+     * @param string $message Message to send to users
+     * @throws \moodle_exception
      */
     public static function manage_applications(
         $action,
@@ -362,6 +372,10 @@ class external extends external_api {
 
     /**
      * Get user summary HTML.
+     * @param int $userid User ID
+     * @param int $instanceid Enrol instance ID
+     * @throws \moodle_exception
+     * @return string HTML summary
      */
     public static function get_user_summary($userid, $instanceid) {
         global $DB, $OUTPUT, $CFG;
@@ -522,6 +536,9 @@ class external extends external_api {
 
     /**
      * Get groups for a course.
+     * @param int $courseid Course ID
+     * @throws \moodle_exception
+     * @return array Array of group arrays
      */
     public static function get_groups($courseid) {
         $params = self::validate_parameters(self::get_groups_parameters(), [
@@ -566,6 +583,9 @@ class external extends external_api {
 
     /**
      * Get roles and dates for an instance.
+     * @param int $instanceid Enrol instance ID
+     * @throws \moodle_exception
+     * @return array Array of role arrays
      */
     public static function get_roles_and_dates($instanceid) {
         global $DB;
@@ -621,6 +641,10 @@ class external extends external_api {
 
     /**
      * Get applications for an instance.
+     * @param int $instanceid Enrol instance ID
+     * @param string $tab Tab/Status
+     * @throws \moodle_exception
+     * @return array Array of application arrays
      */
     public static function get_applications($instanceid, $tab) {
         global $DB, $OUTPUT, $CFG;
@@ -858,6 +882,10 @@ class external extends external_api {
 
     /**
      * Get basic info for a specific application.
+     * @param int $applicationid Application ID
+     * @param int $instanceid Enrol instance ID
+     * @throws \moodle_exception
+     * @return array Array of application info
      */
     public static function get_application_info($applicationid, $instanceid) {
         global $DB, $CFG;

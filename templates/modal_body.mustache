@@ -1,4 +1,21 @@
 
+{{!
+    @template enrol_gapply/modal_body
+
+    Body for the application detail modal.
+
+    Example context (json):
+    {
+        "attachments": [{"url": "#", "mimetype": "application/pdf", "filename": "resume.pdf"}],
+        "identity": [{"name": "Department", "value": "Engineering"}],
+        "applytext": "This is my application text.",
+        "user": {
+            "modifiedon": "2026-05-07",
+            "modifiername": "Admin",
+            "outcomemessage": "Welcome to the course!"
+        }
+    }
+}}
 <div class="split-view">
     <div class="left-pane" id="modal-left-pane">
         <div class="attachment-selector">

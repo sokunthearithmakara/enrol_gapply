@@ -106,7 +106,8 @@ if ($instance->customchar1 > 0) {
 $tabs[] = new tabobject(
     'seats',
     "javascript:void(0);",
-    '<i class="fas fa-users-line me-2 mr-2"></i>' . get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
+    '<i class="fas fa-users-line me-2 mr-2"></i>'
+        . get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
 );
 // Edit instance.
 $tabs[] = new tabobject(
