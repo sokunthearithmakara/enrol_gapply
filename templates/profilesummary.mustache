@@ -9,7 +9,7 @@
         "hasidentity": true,
         "identity": [{"name": "Phone", "value": "123456"}],
         "user": {
-            "picture": "<img src='...'>",
+            "picture": "<img src='#' alt='User picture'>",
             "fullname": "John Doe",
             "lastaccess": "2 mins ago"
         }
@@ -22,8 +22,8 @@
                 {{#hasidentity}}
                 {{#identity}}
                 <dl class="col-sm-6 col-md-4 col-lg-3 mb-2">
-                    <dd class="small mb-0">{{name}}</dd>
-                    <dt>{{#value}}{{value}}{{/value}}{{^value}}-{{/value}}</dt>
+                    <dt class="small mb-0">{{name}}</dt>
+                    <dd class="mb-0 font-weight-bold">{{#value}}{{value}}{{/value}}{{^value}}-{{/value}}</dd>
                 </dl>
                 {{/identity}}
                 {{/hasidentity}}
