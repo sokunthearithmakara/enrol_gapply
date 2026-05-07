@@ -1,17 +1,402 @@
-#page-enrol-gapply-manage #page-content .nav-tabs .nav-item:nth-last-child(2) {
-    margin-left: auto;
-    pointer-events: none;
+.gapply-modal .modal-content {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  border-radius: 0;
 }
 
-#page-enrol-gapply-manage #page-content .nav-tabs .nav-item:nth-last-child(2) & a {
-    color: #000;
+.gapply-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
 }
 
-#page-enrol-gapply-manage table.dataTable > tbody > tr.selected > td.select-checkbox:after,
-table.dataTable > tbody > tr.selected > th.select-checkbox:after {
-    margin-top: -16px;
+.gapply-modal .modal-title-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
 }
 
-#page-enrol-gapply-manage .btn.action-button {
-    color: #fff;
+.gapply-modal .user-info {
+  display: flex;
+  align-items: center;
+}
+
+.gapply-modal .user-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.gapply-modal .user-info .names {
+  font-weight: bold;
+}
+
+.gapply-modal .header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.gapply-modal .header-actions .btn {
+  margin-left: 5px;
+  border-radius: 2rem;
+}
+
+.gapply-modal .modal-body {
+  padding: 0;
+  overflow: hidden;
+  height: 80vh;
+}
+
+.gapply-modal .split-view {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.gapply-modal .left-pane {
+  width: 66.66%;
+  min-width: 300px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  border-right: 1px solid #dee2e6;
+}
+
+.gapply-modal .right-pane {
+  flex-grow: 1;
+  min-width: 250px;
+  height: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gapply-modal .right-pane > .flex-grow-1 {
+  overflow: auto;
+  flex-grow: 1;
+}
+
+.gapply-modal .resizer {
+  width: 8px;
+  cursor: col-resize;
+  background-color: #dee2e6;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.gapply-modal .resizer::after {
+  content: '';
+  width: 2px;
+  height: 30px;
+  background-color: #ccc;
+  border-radius: 2px;
+}
+
+.gapply-modal .resizer:hover {
+  background-color: #007bff;
+}
+
+.gapply-modal .resizer:hover::after {
+  background-color: #fff;
+}
+
+body.resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.resizing .gapply-modal .left-pane,
+body.resizing .gapply-modal .right-pane {
+  pointer-events: none !important;
+}
+
+.gapply-modal .collapsible-section {
+  border-bottom: 1px solid #eee;
+}
+
+.gapply-modal .collapsible-header {
+  padding: 10px 15px;
+  background-color: #fcfcfc;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.gapply-modal .collapsible-header .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.gapply-modal .collapsible-section.collapsed .fa-chevron-down {
+  transform: rotate(-90deg);
+}
+
+.gapply-modal .collapsible-body {
+  padding: 15px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.gapply-modal .collapsible-section.collapsed .collapsible-body {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gapply-modal #viewer {
+  flex-grow: 1;
+  overflow: auto;
+  display: flex;
+  background-color: #f4f4f4;
+}
+
+.gapply-modal #viewer > :is(img, object, iframe, video, p, div) {
+  margin: auto;
+  max-width: 100%;
+}
+
+.gapply-modal #viewer img {
+  height: auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.gapply-modal .attachment-selector {
+  padding: 10px 15px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+#page-enrol-gapply-manage .nav-item:has([href='javascript:void(0);']) {
+  margin-inline-start: auto;
+  pointer-events: none;
+}
+
+@keyframes gapply-modal-pop {
+  0% {
+    transform: scale(0.8) translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.gapply-confirm-modal.show .modal-dialog {
+  animation: gapply-modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#page-enrol-gapply-manage #toast-container,
+#page-enrol-gapply-manage .toast-wrapper {
+  z-index: 9999 !important;
+}
+
+.modal#applyfile .modal-body {
+  height: 100vh;
+}
+
+.modal#applyfile .modal-body :is(object, iframe, video) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gapply-modal-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 1060;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.3rem;
+}
+
+.gapply-modal.is-loading .gapply-modal-loading-overlay {
+  display: flex;
+}
+
+/* Premium Floating Bulk Action Toolbar */
+.gapply-floating-toolbar {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #2b303b;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  z-index: 1050;
+  transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.gapply-floating-toolbar.show {
+  bottom: 30px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.gapply-floating-toolbar .selection-info {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+.gapply-floating-toolbar .selection-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #009688;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+.gapply-floating-toolbar .selection-count {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.gapply-floating-toolbar .toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  padding-left: 15px;
+}
+
+.gapply-floating-toolbar .action-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 0;
+}
+
+.gapply-floating-toolbar .action-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gapply-floating-toolbar .action-button.btn-success {
+  background-color: #28a745;
+}
+
+.gapply-floating-toolbar .action-button.btn-info {
+  background-color: #17a2b8;
+}
+
+.gapply-floating-toolbar .action-button.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.gapply-floating-toolbar .action-button.btn-danger {
+  background-color: #dc3545;
+}
+
+.gapply-floating-toolbar .close-toolbar {
+  background: none;
+  border: none;
+  color: #a0aabf;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 10px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.gapply-floating-toolbar .close-toolbar:hover {
+  color: #fff;
+}
+
+table#gapplytable.dataTable > tbody > tr > td.select-checkbox:before,
+table#gapplytable.dataTable > tbody > tr > th.select-checkbox:before,
+table#gapplytable.dataTable > tbody > tr.selected > td.select-checkbox::after,
+table#gapplytable.dataTable > tbody > tr.selected > th.select-checkbox::after {
+  display: none;
+}
+
+table#gapplytable tr.selected td .fa-square {
+  display: none;
+}
+
+table#gapplytable tr:not(.selected) td .fa-check-square {
+  display: none;
+}
+
+table#gapplytable .header.select-checkbox {
+  text-align: start !important;
+}
+
+#page-enrol-gapply-manage
+  div.table-responsive
+  > div.dataTables_wrapper
+  > div.row:has(.dataTables_paginate) {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  bottom: 0;
+  padding: 1rem;
+  z-index: 10;
+  background: var(--bs-light, --light);
+}
+
+.gapply-groups-container {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.outcomemessage-text {
+  white-space: pre-wrap;
 }

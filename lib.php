@@ -339,7 +339,11 @@ class enrol_gapply_plugin extends enrol_plugin {
             'customtext4',
             get_string('notifyusers', 'enrol_gapply'),
             $formattedusers,
-            ['multiple' => 'multiple']
+            [
+                'multiple' => 'multiple',
+                'size' => 5,
+                'style' => 'width: 100%;',
+            ]
         );
         $mform->addHelpButton('customtext4', 'notifyusers', 'enrol_gapply');
     }
@@ -420,6 +424,7 @@ class enrol_gapply_plugin extends enrol_plugin {
         $record = $DB->get_record('enrol_gapply', ['instance' => $instance->id, 'userid' => $USER->id]);
         if ($record) {
             $recordcontext = [];
+            $recordcontext['id'] = $record->id;
             $recordcontext['instance'] = $instance->id;
             $timeapplied = userdate($record->timecreated);
             $recordcontext['time'] = $timeapplied;
@@ -497,8 +502,16 @@ class enrol_gapply_plugin extends enrol_plugin {
                 $recordcontext['hasapplication'] = true;
             }
 
-            if ($instance->customchar3 == 1 && $record->status == 'new') {
+            if ($instance->customchar3 == 1 && ($record->status == 'new' || $record->status == 'waitlisted')) {
                 $recordcontext['allowwithdrawal'] = true;
+            }
+
+            $recordcontext['moodlebranch'] = $CFG->branch;
+            $recordcontext['outcomemessage'] = '';
+            if (!empty($record->outcomemessage)) {
+                $course = get_course($instance->courseid);
+                $message = \enrol_gapply\external::replace_tags($record->outcomemessage, $USER, $course, $instance);
+                $recordcontext['outcomemessage'] = nl2br(s(trim($message)));
             }
 
             $output = $OUTPUT->render_from_template('enrol_gapply/applicationstatus', $recordcontext);
@@ -655,6 +668,9 @@ class enrol_gapply_plugin extends enrol_plugin {
         if ($mform->is_cancelled()) {
             return false;
         } else if ($data = $mform->get_data()) {
+            $data->userid = $USER->id;
+            $data->courseid = $instance->courseid;
+            $data->instance = $instance->id;
             $data->applytext = isset($data->applytext) ? $data->applytext['text'] : '';
             $data->format = 1;
             $data->status = 'new';
@@ -662,7 +678,7 @@ class enrol_gapply_plugin extends enrol_plugin {
             $data->timemodified = time();
             $data->timecreated = time();
 
-            $DB->insert_record('enrol_gapply', $data);
+            $appid = $DB->insert_record('enrol_gapply', $data);
 
             $filecontext = context_course::instance($instance->courseid);
 
@@ -673,7 +689,7 @@ class enrol_gapply_plugin extends enrol_plugin {
                     $filecontext->id,
                     'enrol_gapply',
                     'applyfile',
-                    $instance->id . $data->userid,
+                    $appid,
                     [
                         'subdirs' => 0,
                         'maxbytes' => $instance->customint6,
@@ -696,10 +712,10 @@ class enrol_gapply_plugin extends enrol_plugin {
                       FROM {user} u
                      WHERE u.id $insql", $inparams);
             } else {
-                $coursecontact = [];
+                $coursecontacts = [];
                 $courseelement = new core_course_list_element($course);
                 if ($courseelement->has_course_contacts()) {
-                    $coursecontact = $courseelement->get_course_contacts();
+                    $coursecontacts = $courseelement->get_course_contacts();
                 }
             }
             if ($coursecontacts) {
@@ -709,7 +725,7 @@ class enrol_gapply_plugin extends enrol_plugin {
                     'coursefullname' => format_text($course->fullname, FORMAT_HTML),
                     'username' => fullname($USER),
                 ]);
-                $message->contexturl = new moodle_url('/enrol/gapply/manage.php', ['id' => $instance->id]);
+                $message->contexturl = new moodle_url('/enrol/gapply/manage.php', ['id' => $instance->id, 'aid' => $appid]);
                 $message->contexturlname = get_string('manageapplications', 'enrol_gapply');
                 $currentlang = current_language();
                 foreach ($coursecontacts as $coursecontact) {
@@ -945,10 +961,12 @@ class enrol_gapply_plugin extends enrol_plugin {
 
         // Additional tasks for gapply.
         // Delete the user from the gapply table.
-        $DB->delete_records('enrol_gapply', ['userid' => $userid, 'courseid' => $courseid]);
-        // Delete any attached files.
+        $records = $DB->get_records('enrol_gapply', ['userid' => $userid, 'courseid' => $courseid]);
         $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'enrol_gapply', 'applyfile', $instance->id . $userid);
+        foreach ($records as $record) {
+            $fs->delete_area_files($context->id, 'enrol_gapply', 'applyfile', $record->id);
+        }
+        $DB->delete_records('enrol_gapply', ['userid' => $userid, 'courseid' => $courseid]);
     }
 
     /**
@@ -998,6 +1016,8 @@ class enrol_gapply_plugin extends enrol_plugin {
  **/
 function enrol_gapply_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     if ($context->contextlevel == CONTEXT_COURSE && ($filearea === 'applyfile')) {
+        require_login(null, false);
+
         $itemid = array_shift($args);
         $filename = array_pop($args);
         if (!$args) {
@@ -1027,6 +1047,14 @@ function enrol_gapply_pluginfile($course, $cm, $context, $filearea, $args, $forc
  * @param context $context The context of the course
  */
 function enrol_gapply_extend_navigation_course(\navigation_node $navigation, \stdClass $course, \context $context) {
+    global $PAGE;
+    // Only load on the participants page.
+    if ($PAGE->url->compare(new moodle_url('/user/index.php'), URL_MATCH_BASE)) {
+        $PAGE->requires->js_call_amd('enrol_gapply/participants_helper', 'init', [
+            ['courseid' => $course->id],
+        ]);
+    }
+
     // Get enrolment instance.
     if (!has_capability('enrol/gapply:manage', $context)) {
         return;

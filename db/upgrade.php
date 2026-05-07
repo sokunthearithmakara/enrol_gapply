@@ -43,5 +43,19 @@ function xmldb_enrol_gapply_upgrade($oldversion) {
     // You will also have to create the db/install.xml file by using the XMLDB Editor.
     // Documentation for the XMLDB Editor can be found at {@link https://docs.moodle.org/dev/XMLDB_editor}.
 
+    if ($oldversion < 2026050700) {
+        // Define field outcomemessage to be added to enrol_gapply.
+        $table = new xmldb_table('enrol_gapply');
+        $field = new xmldb_field('outcomemessage', XMLDB_TYPE_TEXT, null, null, null, null, null, 'status');
+
+        // Conditionally launch add field outcomemessage.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Gapply savepoint reached.
+        upgrade_plugin_savepoint(true, 2026050700, 'enrol', 'gapply');
+    }
+
     return true;
 }

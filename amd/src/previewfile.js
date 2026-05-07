@@ -1,124 +1,162 @@
-
+import Ajax from 'core/ajax';
 import $ from "jquery";
 import Notification from 'core/notification';
 import {add as addToast} from 'core/toast';
-
+import ModalEvents from 'core/modal_events';
+import {get_string as getString} from 'core/str';
 export const init = () => {
-    $(document).on('click', "a[data-type]", function() {
-        var modal = `<div class="modal fade" id="applyfile" data-backdrop="static"
-         data-keyboard="false" tabindex="-1" aria-labelledby="applyfileLabel" aria-modal="true" role="dialog">
-                        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title flex-grow-1" id="applyfileLabel"></h5>
-                                    <button class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-                                    <i class="fa fa-times" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                                <div class="modal-body p-0 text-center d-flex justify-content-center">
-                                </div>
-                                <div class="modal-footer">
-                                    <a href="javascript:void(0)" id="forcedownloadbutton"
-                                        class="btn btn-primary text-uppercase font-weight-bold">
-                                        ${M.util.get_string("download", "enrol_gapply")}</a>
-                                    <button class="btn btn-secondary text-uppercase font-weight-bold"
-                                        data-dismiss="modal" data-bs-dismiss="modal">
-                                        ${M.util.get_string("close", "enrol_gapply")}</button>
-                                </div>
-                            </div>
-                        </div>
-                </div>`;
-        // Remove existing modal
-        $("#applyfile").remove();
-        $("body").append(modal);
-        $("#applyfileLabel").html($(this).text());
-        $("#applyfile").modal("show");
-        let html = '';
-        if ($(this).data("type").includes("image")) {
-            $("#applyfile .modal-body").removeClass("d-flex");
-            html = `<img src="${$(this).data("url")}" class="img-fluid mx-auto">`;
-        } else if ($(this).data("type").includes("video")) {
-            html = `<video src="${$(this).data("url")}"
-                    class="embed-responsive-item text-center m-0" controls width="100%" autoplay></video>`;
-        } else if ($(this).data("type").includes("audio")) {
-            $("#applyfile .modal-body").removeClass("d-flex");
-            html = `<audio src="${$(this).data("url")}"
-                    class="embed-responsive-item text-center m-0" controls width="100%" autoplay></audio>`;
-        } else if ($(this).data("type").includes("pdf")) {
-            html = `<object data="${$(this).data("url")}" type="application/pdf"
-                     width="100%" style="height: 80vh">
-                                            <p>${M.util.get_string('cannotopenpdffile', 'enrol_gapply', $(this).data("url"))}</p>
-                                            </object>`;
-        } else if ($(this).data("type").includes("officedocument") || $(this).data("type").includes("msword")
-            || $(this).data("type").includes("ms-excel")
-            || $(this).data("type").includes("ms-powerpoint") || $(this).data("type").includes("openxmlformats")) {
-            html = `<iframe id="fileviewer"
-                    src="https://view.officeapps.live.com/op/embed.aspx?src=${$(this).data("url")}"
-                    class="embed-responsive-item" style="width: 100%; height: 80vh"></iframe>`;
-        } else if ($(this).data("type").includes("text") || $(this).data("type").includes("csv")) {
-            html = `<iframe id="fileviewer"
-                    src="https://docs.google.com/viewer?url=${$(this).data("url")}&embedded=true"
-                    class="embed-responsive-item" style="width: 100%; height: 80vh; border-radius: 0"></iframe>`;
-        } else {
-            $("#applyfile .modal-body").removeClass("d-flex");
-            html = `<p class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', $(this).data("url"))}</p>`;
-        }
-        $("#applyfile .modal-body").html(html);
-        var newURL = new URL($(this).data("url"));
+    $(document).on('click', "a[data-type]", async function() {
+        let $this = $(this);
+        let url = $this.data("url");
+        let type = $this.data("type");
+        let title = $this.text();
 
-        $("#applyfile").on("click", "#forcedownloadbutton", function() {
+        let html = "";
+        let isFlex = true;
+
+        if (type.includes("image")) {
+            html = `<img src="${url}" class="img-fluid mx-auto">`;
+            isFlex = false;
+        } else if (type.includes("video")) {
+            html = `<video src="${url}"
+                    class="embed-responsive-item text-center m-0" controls width="100%" autoplay></video>`;
+        } else if (type.includes("audio")) {
+            html = `<audio src="${url}"
+                    class="embed-responsive-item text-center m-0" controls width="100%" autoplay></audio>`;
+            isFlex = false;
+        } else if (type.includes("pdf")) {
+            html = `<object data="${url}" type="application/pdf" width="100%">
+                        <p>${M.util.get_string('cannotopenpdffile', 'enrol_gapply', url)}</p>
+                    </object>`;
+        } else if (type.includes("officedocument") || type.includes("msword")
+            || type.includes("ms-excel")
+            || type.includes("ms-powerpoint") || type.includes("openxmlformats")) {
+            html = `<iframe id="fileviewer"
+                    src="https://view.officeapps.live.com/op/embed.aspx?src=${url}"
+                    class="embed-responsive-item" style="width: 100%;"></iframe>`;
+        } else if (type.includes("text") || type.includes("csv")) {
+            html = `<iframe id="fileviewer"
+                    src="https://docs.google.com/viewer?url=${url}&embedded=true"
+                    class="embed-responsive-item" style="width: 100%; border-radius: 0"></iframe>`;
+        } else {
+            html = `<p class="text-center py-5">${M.util.get_string('cannotopenfile', 'enrol_gapply', url)}</p>`;
+            isFlex = false;
+        }
+
+        const branch = parseInt($('#moodle-branch').data('branch'));
+        const isModern = branch >= 403;
+        const modalModule = isModern ? 'core/modal' : 'core/modal_factory';
+
+        let ModalFactory = await import(modalModule);
+
+        // Handle Moodle AMD modules which might wrap the export in .default
+        ModalFactory = ModalFactory.default ? ModalFactory.default : ModalFactory;
+
+        const modal = await ModalFactory.create({
+            title: title,
+            body: html,
+            large: true,
+            removeOnClose: true,
+            isVerticallyCentered: true,
+            footer: `<button class="btn btn-primary text-uppercase font-weight-bold" data-action="download">
+                        ${M.util.get_string("download", "enrol_gapply")}</button>
+                     <button class="btn btn-secondary text-uppercase font-weight-bold" data-action="hide">
+                        ${M.util.get_string("close", "enrol_gapply")}</button>`
+        });
+
+        const root = modal.getRoot();
+        root.attr("id", "applyfile");
+        root.find('.modal-lg').toggleClass('modal-lg modal-xl');
+
+        const body = root.find('.modal-body');
+        body.addClass('p-0 text-center');
+        if (isFlex) {
+            body.addClass('d-flex justify-content-center');
+        }
+
+        let newURL = new URL(url);
+        root.on("click", '[data-action="download"]', function() {
             newURL.searchParams.append("forcedownload", 1);
             window.open(newURL.toString());
         });
+
+        root.on(ModalEvents.hidden, function() {
+            modal.destroy();
+        });
+
+        modal.show();
     });
 
-    $(document).on('click', "#withdraw", function(e) {
+    $(document).on('click', "#withdraw", async function(e) {
         e.preventDefault();
-        const withdraw = () => {
-            $.ajax({
-                method: "POST",
-                url: M.cfg.wwwroot + "/enrol/gapply/ajax.php",
-                data: {
-                    action: "withdraw",
-                    id: $(".btn#withdraw").data("instance"),
-                    sesskey: M.cfg.sesskey,
-                },
-                dataType: "text",
-                success: () => {
-                    addToast(M.util.get_string('applicationwithdrawnsuccess', 'enrol_gapply'), {
-                        type: 'success'
-                    });
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                },
-                error: () => {
-                    addToast(M.util.get_string('anerroroccurred', 'enrol_gapply'), {
-                        type: 'danger'
-                    });
-                }
-            });
+        const $btn = $(this);
+        const instanceId = $btn.data("instance") || 0;
+
+        const branch = parseInt($('#moodle-branch').data('branch'));
+        const isModern = branch >= 403;
+
+        let Modal;
+        if (isModern) {
+            Modal = await import('core/modal_save_cancel').then(m => m.default || m);
+        } else {
+            Modal = await import('core/modal_factory').then(m => m.default || m);
+        }
+
+        const [reasonStr, titleStr, confirmStr, withdrawStr, successStr] = await Promise.all([
+            getString('withdrawalreason', 'enrol_gapply'),
+            getString('withdrawapplication', 'enrol_gapply'),
+            getString('withdrawapplicationconfirm', 'enrol_gapply'),
+            getString('withdraw', 'enrol_gapply'),
+            getString('withdrawalsuccess', 'enrol_gapply')
+        ]);
+
+        const body = `
+            <div class="form-group">
+                <label for="withdrawal-reason" class="font-weight-bold">${reasonStr}</label>
+                <textarea id="withdrawal-reason" class="form-control" rows="3"></textarea>
+            </div>
+            <p class="mt-3 text-muted">${confirmStr}</p>
+        `;
+
+        const modalConfig = {
+            title: titleStr,
+            body: body,
+            removeOnClose: true
         };
 
-        try { // 4.1 +
-            Notification.deleteCancelPromise(
-                M.util.get_string('withdrawapplication', 'enrol_gapply'),
-                M.util.get_string('withdrawapplicationconfirm', 'enrol_gapply'),
-                M.util.get_string('withdraw', 'enrol_gapply'),
-            ).then(() => {
-                return withdraw();
-            }).catch(() => {
-                return;
-            });
-        } catch { // 4.1
-            Notification.saveCancel(
-                M.util.get_string('withdrawapplication', 'enrol_gapply'),
-                M.util.get_string('withdrawapplicationconfirm', 'enrol_gapply'),
-                M.util.get_string('withdraw', 'enrol_gapply'),
-                function() {
-                    return withdraw();
-                }
-            );
+        if (!isModern) {
+            modalConfig.type = Modal.types.SAVE_CANCEL;
         }
+
+        const modal = await Modal.create(modalConfig);
+
+        modal.setSaveButtonText(withdrawStr);
+
+        const handleWithdraw = function(e) {
+            e.preventDefault();
+            const reason = modal.getRoot().find('#withdrawal-reason').val();
+            Ajax.call([{
+                methodname: "enrol_gapply_manage_applications",
+                args: {
+                    action: "withdraw",
+                    ids: [],
+                    instanceid: instanceId,
+                    reason: reason
+                }
+            }])[0].then(() => {
+                modal.hide();
+                addToast(successStr, {
+                    type: 'success'
+                });
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }).catch(Notification.exception);
+        };
+
+        // Listen for both the Modal's save event and direct button click for maximum compatibility.
+        modal.getRoot().on(ModalEvents.save, handleWithdraw);
+
+        modal.show();
     });
 };

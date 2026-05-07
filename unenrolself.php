@@ -28,7 +28,7 @@ $enrolid = required_param('enrolid', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 
 $instance = $DB->get_record('enrol', ['id' => $enrolid, 'enrol' => 'gapply'], '*', MUST_EXIST);
-$course = $DB->get_record('course', ['id' => $instance->courseid], '*', MUST_EXIST);
+$course = get_course($instance->courseid);
 $context = context_course::instance($course->id, MUST_EXIST);
 
 if (!is_enrolled($context)) {

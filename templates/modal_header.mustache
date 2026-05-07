@@ -1,0 +1,51 @@
+<div class="modal-title w-100 d-flex align-items-center justify-content-between">
+    <div class="user-info d-flex align-items-center">
+        {{{user.picture}}}
+        <div class="names-container mx-2">
+            <h5 class="names font-weight-bold mb-0">{{user.fullname}}</h5>
+            <div class="text-muted d-flex align-items-center">
+                <small class="me-1 mr-1">#{{applicationid}}</small>|
+                <small class="mx-1"><i class="fa fa-clock-o mr-1 me-1"></i> {{user.appliedon}}</small>|
+                <div class="status-badge mx-1 p-0">
+                    {{{statushtml}}}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="header-actions">
+        {{^isapproved}}
+        <button class="btn btn-outline-success action-button" data-action="approve" title="{{#str}}approve, enrol_gapply{{/str}}">
+            <i class="fa fa-check"></i>
+        </button>
+        {{^iswaitlisted}}
+        <button class="btn btn-outline-info action-button" data-action="waitlist" title="{{#str}}waitlist, enrol_gapply{{/str}}">
+            <i class="fa fa-clock-o"></i>
+        </button>
+        {{/iswaitlisted}}
+        {{^isrejected}}
+        <button class="btn btn-outline-warning action-button" data-action="reject" title="{{#str}}reject, enrol_gapply{{/str}}">
+            <i class="fa fa-times"></i>
+        </button>
+        {{/isrejected}}
+        {{/isapproved}}
+        <button class="btn btn-outline-danger action-button" data-action="delete" title="{{#str}}delete, enrol_gapply{{/str}}">
+            <i class="fa fa-trash"></i>
+        </button>
+        <div class="mx-2 border-left h-75"></div>
+
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary nav-button" data-action="prev" title="{{#str}}previous, enrol_gapply{{/str}}"
+                {{^previd}}disabled{{/previd}} data-previd="{{previd}}" data-currentid="{{applicationid}}">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <span class="btn btn-outline-secondary" style="pointer-events: none;">
+                <span id="index">{{index}}</span> / <span id="total">{{total}}</span>
+            </span>
+            <button class="btn btn-outline-secondary nav-button mr-2" data-action="next" title="{{#str}}next, enrol_gapply{{/str}}"
+                {{^nextid}}disabled{{/nextid}} data-nextid="{{nextid}}" data-currentid="{{applicationid}}">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+
+<div class="split-view">
+    <div class="left-pane" id="modal-left-pane">
+        <div class="attachment-selector">
+            <select class="custom-select w-100" id="fileselect">
+                {{#attachments}}
+                <option value="{{url}}" data-type="{{mimetype}}">{{filename}}</option>
+                {{/attachments}}
+                {{^attachments}}
+                <option value="">{{#str}}noattachments, enrol_gapply{{/str}}</option>
+                {{/attachments}}
+            </select>
+        </div>
+        <div id="viewer" class="text-center">
+            {{#str}}selectfiletopreview, enrol_gapply{{/str}}
+        </div>
+    </div>
+    <div class="resizer" id="modal-resizer"></div>
+    <div class="right-pane" id="modal-right-pane">
+        <div class="flex-grow-1">
+            <div class="collapsible-section">
+                <div class="collapsible-header" data-toggle="collapse" data-target="#user-fields-collapse">
+                    <span>{{#str}}userdetails, enrol_gapply{{/str}}</span>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div id="user-fields-collapse" class="collapsible-body">
+                    <div class="row mx-0">
+                        {{#identity}}
+                        <dl class="col-sm-6 mb-2">
+                            <dt class="small text-muted mb-0 font-weight-normal">{{name}}</dt>
+                            <dd class="mb-0 font-weight-bold">{{#value}}{{{value}}}{{/value}}{{^value}}-{{/value}}</dd>
+                        </dl>
+                        {{/identity}}
+                    </div>
+                </div>
+            </div>
+            <div class="collapsible-section">
+                <div class="collapsible-header" data-toggle="collapse" data-target="#app-text-collapse">
+                    <span>{{#str}}applicationtext, enrol_gapply{{/str}}</span>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div id="app-text-collapse" class="collapsible-body">
+                    <div id="application-text-content">
+                        {{#applytext}}
+                        {{{applytext}}}
+                        {{/applytext}}
+                        {{^applytext}}
+                        <div class="alert alert-info">{{#str}}noapplicationtext, enrol_gapply{{/str}}</div>
+                        {{/applytext}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{#user.modifiedon}}
+        <div class="p-3 border-top small text-muted bg-light">
+            <i class="fa fa-user-edit me-1"></i>
+            {{#str}}modifiedon, enrol_gapply{{/str}}: <strong>{{user.modifiedon}}</strong>
+            {{#user.modifiername}}
+            {{#str}}by, enrol_gapply{{/str}} <strong>{{user.modifiername}}</strong>
+            {{/user.modifiername}}
+            {{#user.outcomemessage}}
+            <div class="mt-2 outcomemessage-container">
+                <a href="javascript:void(0)" class="text-primary font-weight-bold show-outcome-message">
+                    <i class="fa fa-comment-dots me-1"></i>{{#str}}more, enrol_gapply{{/str}}
+                </a>
+                <div class="outcome-message-content mt-1 border-top pt-1 outcomemessage-text" style="display: none;">{{{user.outcomemessage}}}</div>
+            </div>
+            {{/user.outcomemessage}}
+        </div>
+        {{/user.modifiedon}}
+    </div>
+</div>

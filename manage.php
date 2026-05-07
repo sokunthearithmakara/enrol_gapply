@@ -106,7 +106,7 @@ if ($instance->customchar1 > 0) {
 $tabs[] = new tabobject(
     'seats',
     "javascript:void(0);",
-    get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
+    '<i class="fas fa-users-line me-2 mr-2"></i>' . get_string('seatsinfo', 'enrol_gapply', ['enrolled' => $enrolled, 'seats' => $seats])
 );
 // Edit instance.
 $tabs[] = new tabobject(
@@ -120,7 +120,7 @@ $tabs[] = new tabobject(
             'returnurl' => new moodle_url('/enrol/gapply/manage.php', ['id' => $id, 'tab' => $tab]),
         ]
     ),
-    '<i class="fa fa-cog mr-2"></i>' . get_string('edit', 'enrol_gapply'),
+    '<i class="fa fa-cog"></i>',
     get_string('edit', 'enrol_gapply')
 );
 $content = '';
@@ -134,8 +134,9 @@ if ($records) {
     $table = new html_table();
 
     $table->id = 'gapplytable';
-    $table->attributes['data-instance'] = $id;
-
+    $table->attributes['data-instanceid'] = $id;
+    $table->attributes['data-courseid'] = $instance->courseid;
+    $table->attributes['data-moodle-branch'] = $CFG->branch;
     $table->attributes['class'] = 'table table-striped table-hover d-none generaltable w-100 ' . $tab;
 
     $table->head = [
@@ -157,7 +158,7 @@ if ($records) {
     ];
 
     // Table head must follow the setting enrol_gapply/showuseridentity.
-    $showuseridentity = explode(',', ('firstname,lastname,' . $instance->customtext3));
+    $showuseridentity = explode(',', ('firstname,lastname,' . get_config('enrol_gapply', 'showuseridentity')));
     // Remove "picture" from the list of fields to show.
     $showuseridentity = array_diff(array_filter($showuseridentity), ['picture']);
     foreach ($showuseridentity as $field) {
@@ -203,8 +204,8 @@ if ($records) {
     $table->data = [];
     $PAGE->requires->css(new moodle_url($CFG->wwwroot . '/enrol/gapply/libraries/DataTables/datatables.min.css'));
     $content = html_writer::table($table);
-    $PAGE->requires->js_call_amd('enrol_gapply/custom', 'init', [$tab, $id]);
 }
+$PAGE->requires->js_call_amd('enrol_gapply/custom', 'init', [$tab, $id]);
 
 ob_start();
 print_tabs([$tabs], $tab);
