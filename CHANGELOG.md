@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1] - 2026-06-02
+- Added check to make sure the users who were set to receive application notifications are still enrolled in the course before sending them the notification.
+- Applied format_text to the application text.
+- Added restriction to application attachment (only application owner and enrol_gapply:manage capability can view).
+- Added support for format_mtube (MooTube) to display and process applications directly from the MooTube interface.
+
 ## [2.0] - 2026-05-07
 
 ### 🔄 Architectural Shift: AJAX to Web Services
