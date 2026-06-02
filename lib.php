@@ -699,24 +699,7 @@ class enrol_gapply_plugin extends enrol_plugin {
 
             // Notify course contact (teachers) that a new application has been submitted.
             $course = get_course($instance->courseid);
-            if (!empty($instance->customtext4)) {
-                $coursecontacts = explode(',', $instance->customtext4);
-                // What if the contact is no longer enrolled in the course?
-                $coursecontacts = array_filter($coursecontacts, function ($contact) use ($filecontext) {
-                    return is_enrolled($filecontext, $contact, 'enrol/gapply:manage');
-                });
-                [$insql, $inparams] = $DB->get_in_or_equal($coursecontacts, SQL_PARAMS_NAMED, 'id');
-                $coursecontacts = $DB->get_records_sql("
-                    SELECT u.*
-                      FROM {user} u
-                     WHERE u.id $insql", $inparams);
-            } else {
-                $coursecontacts = [];
-                $courseelement = new core_course_list_element($course);
-                if ($courseelement->has_course_contacts()) {
-                    $coursecontacts = $courseelement->get_course_contacts();
-                }
-            }
+            $coursecontacts = $this->get_application_notification_recipients($instance, $filecontext);
             if ($coursecontacts) {
                 $message = new stdClass();
                 $message->subject = get_string('newapplicationfor', 'enrol_gapply', format_text($course->fullname, FORMAT_HTML));
@@ -753,6 +736,57 @@ class enrol_gapply_plugin extends enrol_plugin {
 
             return $OUTPUT->box($output);
         }
+    }
+
+    /**
+     * Get users who should receive application notifications for an instance.
+     *
+     * @param stdClass $instance Enrol instance.
+     * @param context $context Course context.
+     * @return stdClass[] User records indexed by user id.
+     */
+    public function get_application_notification_recipients(stdClass $instance, context $context): array {
+        global $DB;
+
+        if (!empty($instance->customtext4)) {
+            $userids = array_filter(
+                array_map('intval', explode(',', $instance->customtext4)),
+                function (int $userid) use ($context): bool {
+                    return $userid > 0 && is_enrolled($context, $userid, 'enrol/gapply:manage');
+                }
+            );
+            if (empty($userids)) {
+                return [];
+            }
+
+            [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'id');
+            return $DB->get_records_sql(
+                "SELECT u.*
+                   FROM {user} u
+                  WHERE u.deleted = 0
+                    AND u.id $insql",
+                $inparams
+            );
+        }
+
+        $course = get_course($instance->courseid);
+        $courseelement = new core_course_list_element($course);
+        if (!$courseelement->has_course_contacts()) {
+            return [];
+        }
+
+        $recipients = [];
+        foreach ($courseelement->get_course_contacts() as $contact) {
+            $userid = (int) $contact['user']->id;
+            if (!$userid || !is_enrolled($context, $userid, 'enrol/gapply:manage')) {
+                continue;
+            }
+            if ($user = $DB->get_record('user', ['id' => $userid, 'deleted' => 0])) {
+                $recipients[$userid] = $user;
+            }
+        }
+
+        return $recipients;
     }
 
     /**
@@ -1014,10 +1048,25 @@ class enrol_gapply_plugin extends enrol_plugin {
  *
  **/
 function enrol_gapply_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    global $DB, $USER;
+
     if ($context->contextlevel == CONTEXT_COURSE && ($filearea === 'applyfile')) {
         require_login(null, false);
 
-        $itemid = array_shift($args);
+        $itemid = (int) array_shift($args);
+        $application = $DB->get_record(
+            'enrol_gapply',
+            ['id' => $itemid],
+            'id, userid, courseid',
+            IGNORE_MISSING
+        );
+        if (!$application || (int) $application->courseid !== (int) $course->id) {
+            send_file_not_found();
+        }
+        if ((int) $application->userid !== (int) $USER->id && !has_capability('enrol/gapply:manage', $context)) {
+            send_file_not_found();
+        }
+
         $filename = array_pop($args);
         if (!$args) {
             $filepath = '/';
@@ -1072,4 +1121,67 @@ function enrol_gapply_extend_navigation_course(\navigation_node $navigation, \st
         null,
         new pix_icon('i/report', '')
     );
+}
+
+/**
+ * Serve the applications dynamic table as a fragment (MooTube embedded view).
+ *
+ * @param array $args Fragment arguments.
+ * @return string
+ */
+function enrol_gapply_output_fragment_applications_table($args) {
+    global $CFG;
+
+    require_once($CFG->libdir . '/tablelib.php');
+
+    $args = (object) $args;
+    $context = $args->context;
+    require_capability('enrol/gapply:manage', $context);
+
+    $instanceid = clean_param($args->instanceid ?? 0, PARAM_INT);
+    $status = clean_param($args->status ?? 'new', PARAM_ALPHA);
+    $uniqueid = clean_param($args->uniqueid ?? ('enrol_gapply_applications_' . $instanceid), PARAM_ALPHANUMEXT);
+
+    if (!$instanceid) {
+        throw new moodle_exception('invalidinstance', 'enrol_gapply');
+    }
+
+    if (!in_array($status, ['new', 'approved', 'waitlisted', 'rejected'], true)) {
+        $status = 'new';
+    }
+
+    $table = new \enrol_gapply\table\applications($uniqueid);
+    $filterset = new \enrol_gapply\table\applications_filterset();
+    $filterset->add_filter(new \core_table\local\filter\integer_filter(
+        'instanceid',
+        \core_table\local\filter\filter::JOINTYPE_DEFAULT,
+        [$instanceid]
+    ));
+    $filterset->add_filter(new \core_table\local\filter\string_filter(
+        'status',
+        \core_table\local\filter\filter::JOINTYPE_DEFAULT,
+        [$status]
+    ));
+
+    $keywords = trim(clean_param($args->keywords ?? '', PARAM_RAW));
+    if ($keywords !== '') {
+        $filterset->add_filter(new \core_table\local\filter\string_filter(
+            'keywords',
+            \core_table\local\filter\filter::JOINTYPE_DEFAULT,
+            [$keywords]
+        ));
+    }
+
+    $pagesize = (int) get_config('moodlecourse', 'participantsperpage');
+    if (!$pagesize) {
+        $pagesize = 20;
+    }
+
+    ob_start();
+    $table->set_filterset($filterset);
+    $table->out($pagesize, false);
+    $html = ob_get_contents();
+    ob_end_clean();
+
+    return $html;
 }

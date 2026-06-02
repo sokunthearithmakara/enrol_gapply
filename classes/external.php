@@ -284,23 +284,7 @@ class external extends external_api {
             case 'withdraw':
                 $records = $DB->get_records('enrol_gapply', ['instance' => $instance->id, 'userid' => $USER->id]);
                 if ($records) {
-                    if (!empty($instance->customtext4)) {
-                        $coursecontacts = explode(',', $instance->customtext4);
-                        $coursecontacts = array_filter($coursecontacts, function ($contact) use ($context) {
-                            return is_enrolled($context, $contact, 'enrol/gapply:manage');
-                        });
-                        [$insql, $inparams] = $DB->get_in_or_equal($coursecontacts, SQL_PARAMS_NAMED, 'id');
-                        $coursecontacts = $DB->get_records_sql("
-                            SELECT u.*
-                              FROM {user} u
-                             WHERE u.id $insql", $inparams);
-                    } else {
-                        $coursecontacts = [];
-                        $courseelement = new core_course_list_element($course);
-                        if ($courseelement->has_course_contacts()) {
-                            $coursecontacts = $courseelement->get_course_contacts();
-                        }
-                    }
+                    $coursecontacts = $enrol->get_application_notification_recipients($instance, $context);
 
                     if ($coursecontacts) {
                         $reason = trim($params['reason']);
@@ -314,6 +298,8 @@ class external extends external_api {
                             'username' => fullname($USER),
                             'reason' => $reason,
                         ]);
+                        $msg->contexturl = new moodle_url('/enrol/gapply/manage.php', ['id' => $instance->id]);
+                        $msg->contexturlname = get_string('manageapplications', 'enrol_gapply');
 
                         $currentlang = current_language();
                         foreach ($coursecontacts as $contact) {
@@ -327,18 +313,7 @@ class external extends external_api {
                                 ]);
                             }
 
-                            $message = new \core\message\message();
-                            $message->component = 'enrol_gapply';
-                            $message->name = 'gapply';
-                            $message->userfrom = $USER;
-                            $message->userto = $contact;
-                            $message->subject = $msg->subject;
-                            $message->fullmessage = $msg->text;
-                            $message->fullmessageformat = FORMAT_MARKDOWN;
-                            $message->fullmessagehtml = $msg->text;
-                            $message->smallmessage = $msg->text;
-                            $message->notification = 1;
-                            message_send($message);
+                            $enrol->send_notification($contact, $USER, $msg);
                         }
                         $SESSION->lang = $currentlang;
                     }
@@ -946,7 +921,8 @@ class external extends external_api {
             'found' => true,
             'userid' => $record->userid,
             'status' => $statushtml,
-            'applytext' => $record->applytext ?? '',
+            'statusraw' => $record->status,
+            'applytext' => format_text($record->applytext ?? '', $record->format ?? FORMAT_HTML, ['context' => $context]),
             'attachments' => $attachments,
         ];
     }
@@ -959,6 +935,7 @@ class external extends external_api {
             'found' => new external_value(PARAM_BOOL, 'Found status'),
             'userid' => new external_value(PARAM_INT, 'User ID', VALUE_OPTIONAL),
             'status' => new external_value(PARAM_RAW, 'Application status HTML', VALUE_OPTIONAL),
+            'statusraw' => new external_value(PARAM_ALPHA, 'Application status raw', VALUE_OPTIONAL),
             'applytext' => new external_value(PARAM_RAW, 'Application text', VALUE_OPTIONAL),
             'attachments' => new external_multiple_structure(
                 new external_single_structure([
@@ -971,6 +948,66 @@ class external extends external_api {
             ),
         ]);
     }
+    /**
+     * Parameters for get_status_counts.
+     */
+    public static function get_status_counts_parameters() {
+        return new external_function_parameters([
+            'instanceid' => new external_value(PARAM_INT, 'Enrol instance ID'),
+        ]);
+    }
+
+    /**
+     * Get application counts grouped by status.
+     *
+     * @param int $instanceid Enrol instance ID
+     * @return array
+     */
+    public static function get_status_counts($instanceid) {
+        global $DB;
+
+        $params = self::validate_parameters(self::get_status_counts_parameters(), [
+            'instanceid' => $instanceid,
+        ]);
+
+        $instance = $DB->get_record('enrol', ['id' => $params['instanceid'], 'enrol' => 'gapply'], '*', MUST_EXIST);
+        $context = context_course::instance($instance->courseid);
+        self::validate_context($context);
+        require_capability('enrol/gapply:manage', $context);
+
+        $counts = [
+            'new' => 0,
+            'approved' => 0,
+            'waitlisted' => 0,
+            'rejected' => 0,
+        ];
+
+        $sql = 'SELECT status, COUNT(1) AS total
+                  FROM {enrol_gapply}
+                 WHERE instance = ?
+              GROUP BY status';
+        $records = $DB->get_records_sql($sql, [$instance->id]);
+        foreach ($records as $record) {
+            if (array_key_exists($record->status, $counts)) {
+                $counts[$record->status] = (int) $record->total;
+            }
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Returns get_status_counts result.
+     */
+    public static function get_status_counts_returns() {
+        return new external_single_structure([
+            'new' => new external_value(PARAM_INT, 'New applications count'),
+            'approved' => new external_value(PARAM_INT, 'Approved applications count'),
+            'waitlisted' => new external_value(PARAM_INT, 'Waitlisted applications count'),
+            'rejected' => new external_value(PARAM_INT, 'Rejected applications count'),
+        ]);
+    }
+
     /**
      * Replace tags in the message.
      *

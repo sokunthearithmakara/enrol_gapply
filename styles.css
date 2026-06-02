@@ -44,11 +44,79 @@
 .gapply-modal .header-actions {
   display: flex;
   align-items: center;
+  gap: 0.375rem;
 }
 
-.gapply-modal .header-actions .btn {
-  margin-left: 5px;
-  border-radius: 2rem;
+/* Circular outline icon buttons (not pill/square). */
+.gapply-modal .header-actions .action-button {
+  align-items: center;
+  border-radius: 50%;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 2.25rem;
+  justify-content: center;
+  line-height: 1;
+  margin-left: 0;
+  padding: 0;
+  width: 2.25rem;
+}
+
+.gapply-modal .header-actions .action-button .fa {
+  font-size: 0.875rem;
+}
+
+/* Connected prev | count | next pill — do not round each segment fully. */
+.gapply-modal .header-actions .btn-group > .btn,
+.gapply-modal .header-actions .btn-group > span.btn {
+  margin-left: 0;
+}
+
+.gapply-modal .header-actions .btn-group > .nav-button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  width: 2.25rem;
+}
+
+.gapply-modal .header-actions .btn-group > span.btn {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.gapply-modal .header-actions .btn-group > .btn:not(:first-child),
+.gapply-modal .header-actions .btn-group > span.btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.gapply-modal .header-actions .btn-group > .btn:not(:last-child),
+.gapply-modal .header-actions .btn-group > span.btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.gapply-modal .header-actions .btn-group > .btn:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.gapply-modal .header-actions .btn-group > .btn:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.gapply-modal .header-actions .btn-group > .btn:first-child,
+.gapply-modal .header-actions .btn-group > span.btn:first-child {
+  border-bottom-left-radius: var(--bs-border-radius, 0.375rem);
+  border-top-left-radius: var(--bs-border-radius, 0.375rem);
+}
+
+.gapply-modal .header-actions .btn-group > .btn:last-child,
+.gapply-modal .header-actions .btn-group > span.btn:last-child {
+  border-bottom-right-radius: var(--bs-border-radius, 0.375rem);
+  border-top-right-radius: var(--bs-border-radius, 0.375rem);
 }
 
 .gapply-modal .modal-body {
@@ -267,6 +335,10 @@ body.resizing .gapply-modal .right-pane {
   bottom: 30px;
   opacity: 1;
   visibility: visible;
+}
+
+.mtube-participants-modal > .gapply-floating-toolbar.show {
+  bottom: 1.5rem;
 }
 
 .gapply-floating-toolbar .selection-info {

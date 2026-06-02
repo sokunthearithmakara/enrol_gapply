@@ -112,4 +112,11 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'enrol_gapply_get_status_counts' => [
+        'classname'   => 'enrol_gapply\external',
+        'methodname'  => 'get_status_counts',
+        'description' => 'Get application counts grouped by status.',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 ];

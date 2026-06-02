@@ -57,5 +57,9 @@ function xmldb_enrol_gapply_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026050700, 'enrol', 'gapply');
     }
 
+    if ($oldversion < 2026052900) {
+        upgrade_plugin_savepoint(true, 2026052900, 'enrol', 'gapply');
+    }
+
     return true;
 }
