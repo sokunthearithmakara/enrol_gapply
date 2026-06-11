@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2] - 2026-06-11
+- Fixed Moodle 4.2 compatibility on the manage applications page by removing the missing `core/modal_types` AMD dependency and using the default modal type exposed by `core/modal_factory`.
+- Fixed applicant-facing attachment display after the application file itemid migration, and added an upgrade step to move legacy attachment records to application-id itemids.
+
 ## [2.1] - 2026-06-02
 - Added check to make sure the users who were set to receive application notifications are still enrolled in the course before sending them the notification.
 - Applied format_text to the application text.

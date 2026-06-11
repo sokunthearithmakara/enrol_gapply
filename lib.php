@@ -466,7 +466,7 @@ class enrol_gapply_plugin extends enrol_plugin {
                     $coursecontext->id,
                     'enrol_gapply',
                     'applyfile',
-                    $instance->id . $record->userid,
+                    $record->id,
                     'filename',
                     false
                 )
@@ -1048,25 +1048,8 @@ class enrol_gapply_plugin extends enrol_plugin {
  *
  **/
 function enrol_gapply_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    global $DB, $USER;
-
     if ($context->contextlevel == CONTEXT_COURSE && ($filearea === 'applyfile')) {
-        require_login(null, false);
-
         $itemid = (int) array_shift($args);
-        $application = $DB->get_record(
-            'enrol_gapply',
-            ['id' => $itemid],
-            'id, userid, courseid',
-            IGNORE_MISSING
-        );
-        if (!$application || (int) $application->courseid !== (int) $course->id) {
-            send_file_not_found();
-        }
-        if ((int) $application->userid !== (int) $USER->id && !has_capability('enrol/gapply:manage', $context)) {
-            send_file_not_found();
-        }
-
         $filename = array_pop($args);
         if (!$args) {
             $filepath = '/';

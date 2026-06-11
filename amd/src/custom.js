@@ -63,14 +63,8 @@ define(
                 const isModern = branch >= 403; // Moodle 4.3+
                 const modalModule = isModern ? 'core/modal' : 'core/modal_factory';
                 const eventsModule = 'core/modal_events';
-                const typesModule = isModern ? null : 'core/modal_types';
 
-                const deps = [modalModule, eventsModule];
-                if (typesModule) {
-                    deps.push(typesModule);
-                }
-
-                require(deps, function(Modal, ModalEvents, ModalTypes) {
+                require([modalModule, eventsModule], function(Modal, ModalEvents) {
                     originalTitle = document.title;
 
                     $(document).on('click', 'a[data-type]', async function() {
@@ -821,11 +815,8 @@ define(
 
                         try {
                             if (!detailModal) {
-                                if (isModern) {
-                                    detailModal = await Modal.create({type: Modal.TYPE, large: true});
-                                } else {
-                                    detailModal = await Modal.create({type: ModalTypes.DEFAULT, large: true});
-                                }
+                                const modalType = isModern ? Modal.TYPE : Modal.types.DEFAULT;
+                                detailModal = await Modal.create({type: modalType, large: true});
                                 detailRoot = detailModal.getRoot();
                                 detailRoot.addClass('gapply-modal');
                                 detailRoot.find('.modal-content').append(`<div class="gapply-modal-loading-overlay">
