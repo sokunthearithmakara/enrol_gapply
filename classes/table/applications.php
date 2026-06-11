@@ -254,7 +254,7 @@ class applications extends \table_sql implements dynamic_table {
             if ($keyword !== '') {
                 $like = '%' . $DB->sql_like_escape($keyword) . '%';
                 $fullname = $DB->sql_fullname('u.firstname', 'u.lastname');
-                $where .= ' AND (' . $DB->sql_like('CAST(g.id AS CHAR)', ':keywordid', false) .
+                $where .= ' AND (' . $DB->sql_like($DB->sql_cast_to_char('g.id'), ':keywordid', false) .
                     ' OR ' . $DB->sql_like($fullname, ':keywordname', false) . ')';
                 $params['keywordid'] = $like;
                 $params['keywordname'] = $like;

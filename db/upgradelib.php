@@ -31,7 +31,25 @@ function enrol_gapply_migrate_legacy_applyfile_itemids() {
 
     require_once($CFG->libdir . '/filestorage/file_storage.php');
 
-    $records = $DB->get_recordset_sql(
+    $legacyitemids = [];
+    $applications = $DB->get_recordset('enrol_gapply', null, '', 'id, courseid, instance, userid');
+    foreach ($applications as $application) {
+        $courseid = (int) $application->courseid;
+        $legacyitemid = (string) $application->instance . (string) $application->userid;
+
+        if (!isset($legacyitemids[$courseid])) {
+            $legacyitemids[$courseid] = [];
+        }
+
+        if (array_key_exists($legacyitemid, $legacyitemids[$courseid])) {
+            $legacyitemids[$courseid][$legacyitemid] = false;
+        } else {
+            $legacyitemids[$courseid][$legacyitemid] = (int) $application->id;
+        }
+    }
+    $applications->close();
+
+    $files = $DB->get_recordset_sql(
         "SELECT f.id AS fileid,
                 f.contextid,
                 f.component,
@@ -39,22 +57,12 @@ function enrol_gapply_migrate_legacy_applyfile_itemids() {
                 f.itemid,
                 f.filepath,
                 f.filename,
-                g.id AS applicationid,
-                g.instance,
-                g.userid
+                ctx.instanceid AS courseid
            FROM {files} f
            JOIN {context} ctx ON ctx.id = f.contextid
-           JOIN {enrol_gapply} g ON g.courseid = ctx.instanceid
           WHERE ctx.contextlevel = :contextlevel
                 AND f.component = :component
-                AND f.filearea = :filearea
-                AND NOT EXISTS (
-                    SELECT 1
-                      FROM {enrol_gapply} g2
-                     WHERE g2.courseid = g.courseid
-                           AND g2.id <> g.id
-                           AND CAST(CONCAT(g2.instance, g2.userid) AS DECIMAL(20,0)) = f.itemid
-                )",
+                AND f.filearea = :filearea",
         [
             'contextlevel' => CONTEXT_COURSE,
             'component' => 'enrol_gapply',
@@ -62,19 +70,25 @@ function enrol_gapply_migrate_legacy_applyfile_itemids() {
         ]
     );
 
-    foreach ($records as $record) {
-        $legacyitemid = (string) $record->instance . (string) $record->userid;
-        if ((string) $record->itemid !== $legacyitemid || (int) $record->itemid === (int) $record->applicationid) {
+    foreach ($files as $file) {
+        $courseid = (int) $file->courseid;
+        $legacyitemid = (string) $file->itemid;
+        if (empty($legacyitemids[$courseid]) || !array_key_exists($legacyitemid, $legacyitemids[$courseid])) {
+            continue;
+        }
+
+        $applicationid = $legacyitemids[$courseid][$legacyitemid];
+        if ($applicationid === false || (int) $file->itemid === $applicationid) {
             continue;
         }
 
         $pathnamehash = \file_storage::get_pathname_hash(
-            $record->contextid,
-            $record->component,
-            $record->filearea,
-            $record->applicationid,
-            $record->filepath,
-            $record->filename
+            $file->contextid,
+            $file->component,
+            $file->filearea,
+            $applicationid,
+            $file->filepath,
+            $file->filename
         );
 
         if ($DB->record_exists('files', ['pathnamehash' => $pathnamehash])) {
@@ -82,11 +96,11 @@ function enrol_gapply_migrate_legacy_applyfile_itemids() {
         }
 
         $DB->update_record('files', (object) [
-            'id' => $record->fileid,
-            'itemid' => $record->applicationid,
+            'id' => $file->fileid,
+            'itemid' => $applicationid,
             'pathnamehash' => $pathnamehash,
         ]);
     }
 
-    $records->close();
+    $files->close();
 }
